@@ -1,0 +1,47 @@
+/*
+ * Samsung's Exynos8895 SoC device tree source
+ *
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
+ *
+ * Samsung's Exynos8895 SoC device nodes are listed in this file.
+ * Exynos8895 based board files can include this file and provide
+ * values for board specific bindings.
+ *
+ * Note: This file does not include device nodes for all the controllers in
+ * Exynos8895 SoC. As device tree coverage for Exynos8895 increases,
+ * additional nodes can be added to this file.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/dts-v1/;
+#include "exynos8895.dtsi"
+
+/ {
+	model = "Samsung Galaxy S8 based on EXYNOS8895";
+	compatible = "samsung,exynos8895-dreamlte", "samsung,exynos8895";
+
+	memory@80000000 {
+		device_type = "memory";
+
+		reg = <0x0 0x80000000 0x0 0x3C800000>;
+	};
+
+	memory@C0000000 {
+		device_type = "memory";
+
+		reg = <0x0 0xC0000000 0x0 0x40000000>;
+	};
+
+	memory@880000000 {
+		device_type = "memory";
+
+		reg = <0x00000008 0x80000000 0x0 0x80000000>;
+	};
+};
+
+&xxti {
+	clock-frequency = <26000000>;
+};
