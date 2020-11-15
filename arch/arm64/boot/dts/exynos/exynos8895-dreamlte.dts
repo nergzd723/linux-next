@@ -40,6 +40,19 @@
 
 		reg = <0x00000008 0x80000000 0x0 0x80000000>;
 	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		ramoops@92000000 {
+			compatible = "ramoops";
+			reg = <0 0x92000000 0 0x8000>;
+			record-size = <0x4000>;
+			console-size = <0x4000>;
+		};
+	};
 };
 
 &xxti {
