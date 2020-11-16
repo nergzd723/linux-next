@@ -7,8 +7,8 @@
 #include "exynos8895.dtsi"
 
 / {
-	model = "Samsung Galaxy S8 based on EXYNOS8895";
-	compatible = "samsung,exynos8895-dreamlte", "samsung,exynos8895";
+	model = "Samsung Galaxy S8 (Exynos)";
+	compatible = "samsung,dreamlte", "samsung,exynos8895";
 
 	memory@80000000 {
 		device_type = "memory";
