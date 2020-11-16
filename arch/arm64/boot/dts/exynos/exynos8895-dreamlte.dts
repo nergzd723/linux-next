@@ -1,19 +1,6 @@
+// SPDX-License-Identifier: BSD-3-Clause
 /*
- * Samsung's Exynos8895 SoC device tree source
- *
- * Copyright (c) 2016 Samsung Electronics Co., Ltd.
- *
- * Samsung's Exynos8895 SoC device nodes are listed in this file.
- * Exynos8895 based board files can include this file and provide
- * values for board specific bindings.
- *
- * Note: This file does not include device nodes for all the controllers in
- * Exynos8895 SoC. As device tree coverage for Exynos8895 increases,
- * additional nodes can be added to this file.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
+ * Copyright (c) 2020, Ivaylo Ivanov <ivo.ivanov@null.net>
  */
 
 /dts-v1/;
