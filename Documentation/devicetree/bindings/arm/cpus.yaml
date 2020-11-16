@@ -170,6 +170,7 @@ properties:
       - qcom,kryo468
       - qcom,kryo485
       - qcom,scorpion
+      - samsung,mongoose-m2
 
   enable-method:
     $ref: '/schemas/types.yaml#/definitions/string'

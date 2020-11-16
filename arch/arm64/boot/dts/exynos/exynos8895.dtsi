@@ -54,28 +54,28 @@
 
 		cpu@0 {
 			device_type = "cpu";
-			compatible = "arm,mongoose", "arm,armv8";
+			compatible = "samsung,mongoose-m2", "arm,armv8";
 			reg = <0x0>;
 			enable-method = "psci";
 		};
 
 		cpu@1 {
 			device_type = "cpu";
-			compatible = "arm,mongoose", "arm,armv8";
+			compatible = "samsung,mongoose-m2", "arm,armv8";
 			reg = <0x1>;
 			enable-method = "psci";
 		};
 
 		cpu@2 {
 			device_type = "cpu";
-			compatible = "arm,mongoose", "arm,armv8";
+			compatible = "samsung,mongoose-m2", "arm,armv8";
 			reg = <0x2>;
 			enable-method = "psci";
 		};
 
 		cpu@3 {
 			device_type = "cpu";
-			compatible = "arm,mongoose", "arm,armv8";
+			compatible = "samsung,mongoose-m2", "arm,armv8";
 			reg = <0x3>;
 			enable-method = "psci";
 		};
