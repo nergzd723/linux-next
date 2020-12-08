@@ -5,6 +5,7 @@
 
 /dts-v1/;
 #include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/pinctrl/samsung.h>
 
 / {
 	compatible = "samsung,exynos8895";
@@ -105,6 +106,11 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 		ranges = <0 0 0 0x18000000>;
+
+		chipid@10000000 {
+			compatible = "samsung,exynos8895-chipid";
+			reg = <0x0 0x10000000 0x100>;
+		};
 
 		gic: interrupt-controller@10200000 {
 			compatible = "arm,cortex-a15-gic";
