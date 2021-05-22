@@ -273,6 +273,13 @@
 	status = "okay";
 };
 
+&ipa {
+	status = "okay";
+
+	memory-region = <&ipa_fws_region>; // ipa_fw_mem? ipa_gsi_mem?
+	firmware-name = "qcom/msm8998/oneplus/ipa_fws.mbn";
+};
+
 &pm8005_regulators {
 	/* VDD_GFX supply */
 	pm8005_s1: s1 {
