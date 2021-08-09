@@ -190,6 +190,8 @@
 #define AGGRE2_SNOC_NORTH_AXI					181
 #define SSC_XO							182
 #define SSC_CNOC_AHBS_CLK					183
+#define HLOS1_VOTE_LPASS_CORE_SMMU_CLK				184
+#define HLOS1_VOTE_LPASS_ADSP_SMMU_CLK				185
 
 #define PCIE_0_GDSC						0
 #define UFS_GDSC						1
@@ -304,5 +306,6 @@
 #define GCC_QUSB2PHY_PRIM_BCR					106
 #define GCC_QUSB2PHY_SEC_BCR					107
 #define GCC_MSS_RESTART						108
+#define GCC_MSS_Q6_BIMC_AXI_CLK					109
 
 #endif
