@@ -271,7 +271,7 @@
 };
 
 &blsp2_i2c3 {
-	status = "okay";
+	status = "disabled";
 
 	audio-codec@36 {
 		compatible = "nxp,tfa9890";
@@ -284,6 +284,7 @@
 
 		sound-name-prefix = "Mono Speaker";
 		#sound-dai-cells = <0>;
+		status = "disabled";
 	};
 };
 
