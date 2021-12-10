@@ -72,5 +72,16 @@
 
 			status = "disabled";
 		};
+
+		pmi8998_haptics: haptics@c000 {
+			compatible = "qcom,pmi8998-haptics";
+			reg = <0xc000>;
+
+			interrupts = <0x3 0xc0 0x0 IRQ_TYPE_EDGE_BOTH>,
+				     <0x3 0xc0 0x1 IRQ_TYPE_EDGE_BOTH>;
+			interrupt-names = "short", "play";
+
+			status = "disabled";
+		};
 	};
 };
