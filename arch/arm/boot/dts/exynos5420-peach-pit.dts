@@ -194,6 +194,11 @@
 	samsung,invert-vclk;
 };
 
+&gpu {
+	status = "okay";
+	mali-supply = <&buck4_reg>;
+};
+
 &hdmi {
 	status = "okay";
 	hpd-gpios = <&gpx3 7 GPIO_ACTIVE_HIGH>;
