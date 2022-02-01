@@ -27,7 +27,7 @@
 		};
 
 		codec {
-			sound-dai = <&max98090 0>, <&hdmi>;
+			sound-dai = <&max98090 0>;
 		};
 	};
 };
