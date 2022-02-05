@@ -178,6 +178,11 @@
 
 	sound {
 		samsung,i2s-controller = <&i2s0>;
+		samsung,hp-det-gpios = <&gpx2 2 GPIO_ACTIVE_HIGH>;
+		samsung,mic-det-gpios = <&gpx2 0 GPIO_ACTIVE_LOW>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&hp_det_gpio &mic_det_gpio>;
 	};
 
 	usb3_vbus_reg: regulator-usb3 {
@@ -632,6 +637,20 @@
 		samsung,pins = "gpx1-6";
 		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
 		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
+		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
+	};
+
+	mic_det_gpio: mic-det-gpio-pins {
+		samsung,pins = "gpx2-0";
+		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
+		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
+		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
+	};
+
+	hp_det_gpio: hp-det-gpio-pins {
+		samsung,pins = "gpx2-2";
+		samsung,pin-function = <EXYNOS_PIN_FUNC_INPUT>;
+		samsung,pin-pud = <EXYNOS_PIN_PULL_DOWN>;
 		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
 	};
 
