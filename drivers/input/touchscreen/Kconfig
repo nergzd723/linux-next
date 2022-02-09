@@ -1375,4 +1375,13 @@ config TOUCHSCREEN_HIMAX852X
 		To compile this driver as a module, choose M here: the
 		module will be called himax_852xES.
 
+config TOUCHSCREEN_IMAGIS
+	tristate "Imagis touchscreens"
+	depends on I2C
+	help
+		Say Y here if you have a Himax 852xES touchscreen.
+		If unsure, say N.
+		To compile this driver as a module, choose M here: the
+		module will be called himax_852xES.
+
 endif
