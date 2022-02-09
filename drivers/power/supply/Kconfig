@@ -317,6 +317,17 @@ config BATTERY_DA9150
 	  This driver can also be built as a module. If so, the module will be
 	  called da9150-fg.
 
+config BATTERY_SM5703
+	tristate "SiliconMitus SM5703 Fuel Gauge support"
+	depends on I2C
+	help
+	  Say Y here to enable support for the Fuel-Gauge unit of the DA9150
+	  Integrated Charger & Fuel-Gauge IC
+
+	  This driver can also be built as a module. If so, the module will be
+	  called da9150-fg.
+
+
 config CHARGER_AXP20X
 	tristate "X-Powers AXP20X and AXP22X AC power supply driver"
 	depends on MFD_AXP20X
