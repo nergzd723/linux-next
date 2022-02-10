@@ -4,6 +4,8 @@
 
 #include "msm8916-pm8916.dtsi"
 #include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/leds/common.h>
+#include <dt-bindings/sound/apq8016-lpass.h>
 
 / {
 	model = "Samsung Galaxy J5 (2015)";
@@ -22,6 +24,15 @@
 		/* Additional memory used by Samsung firmware modifications */
 		tz-apps@85500000 {
 			reg = <0x0 0x85500000 0x0 0xb00000>;
+			no-map;
+		};
+		mpss_mem: mpss@86800000 {
+			reg = <0x0 0x86800000 0x0 0x5500000>;
+			no-map;
+		};
+
+		gps_mem: gps@8bd00000 {
+			reg = <0x0 0x8bd00000 0x0 0x200000>;
 			no-map;
 		};
 	};
@@ -44,6 +55,7 @@
 			lable = "Home Key";
 			gpios = <&msmgpio 109 GPIO_ACTIVE_LOW>;
 			linux,code = <KEY_HOMEPAGE>;
+			wakeup-source;
 		};
 	};
 
@@ -76,10 +88,308 @@
 			st,drdy-int-pin = <1>;
 		};
 	};
+
+	i2c-regulator {
+		compatible = "i2c-gpio";
+
+		sda-gpios = <&msmgpio 22 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&msmgpio 23 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&regulator_i2c_default>;
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		mfd@49 {
+			compatible = "siliconmitus,sm5703-mfd";
+			reg = <0x49>;
+
+			reset-gpio = <&msmgpio 24 GPIO_ACTIVE_HIGH>;
+			pinctrl-0 = <&mrstb_default>;
+
+			regulator {
+				compatible = "siliconmitus,sm5703-regulator";
+
+				regulators {
+					sm5703_ldo1: ldo1 {
+						regulator-min-microvolt = <2800000>;
+						regulator-max-microvolt = <2800000>;
+					};
+
+					sm5703_ldo2: ldo2 {
+						regulator-min-microvolt = <1500000>;
+						regulator-max-microvolt = <3300000>;
+					};
+
+					sm5703_ldo3: ldo3 {
+						regulator-min-microvolt = <3300000>;
+						regulator-max-microvolt = <3300000>;
+					};
+
+					sm5703_usbldo1: usbldo1 {
+						regulator-min-microvolt = <4800000>;
+						regulator-max-microvolt = <4800000>;
+					};
+
+					sm5703_usbldo2: usbldo2 {
+						regulator-min-microvolt = <4800000>;
+						regulator-max-microvolt = <4800000>;
+					};
+
+					sm5703_vbus: vbus {
+						regulator-min-microvolt = <4800000>;
+						regulator-max-microvolt = <4800000>;
+					};
+				};
+			};
+
+			flash {
+				compatible = "siliconmitus,sm5703-flash";
+
+				flash-gpio = <&msmgpio 34 GPIO_ACTIVE_HIGH>;
+				torch-gpio = <&msmgpio 36 GPIO_ACTIVE_HIGH>;
+
+				back-led {
+					function = LED_FUNCTION_FLASH;
+					color = <LED_COLOR_ID_WHITE>;
+					led-max-microamp = <170000>;
+					flash-max-microamp = <1200000>;
+				};
+			};
+
+			charger {
+				compatible = "siliconmitus,sm5703-charger";
+				siliconmitus,enable-autoset;
+				siliconmitus,enable-autostop;
+			};
+		};
+	};
+
+	i2c-fg {
+		compatible = "i2c-gpio";
+
+		sda-gpios = <&msmgpio 14 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&msmgpio 15 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&fg_i2c_default>;
+		status = "okay";
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		fuelgauge@50 {
+			compatible = "siliconmitus,sm5703-fg";
+			reg = <0x71>;
+
+			interrupt-parent = <&msmgpio>;
+			interrupts = <121 IRQ_TYPE_EDGE_FALLING>;
+		};
+	};
+
+	i2c-muic {
+		compatible = "i2c-gpio";
+
+		sda-gpios = <&msmgpio 105 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&msmgpio 106 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&muic_i2c_default>;
+		status = "okay";
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		sm5703_extcon: extcon@50 {
+			compatible = "siliconmitus,sm5703-muic";
+			reg = <0x25>;
+			interrupt-parent = <&msmgpio>;
+			interrupts = <12 IRQ_TYPE_EDGE_FALLING>;
+		};
+	};
+
+	ktd2692 {
+		compatible = "kinetic,ktd2692";
+		ctrl-gpios = <&msmgpio 50 GPIO_ACTIVE_HIGH>;
+
+		front-flash-led {
+			function = LED_FUNCTION_FLASH;
+			color = <LED_COLOR_ID_WHITE>;
+			led-max-microamp = <300000>;
+			flash-max-microamp = <1500000>;
+			flash-max-timeout-us = <1835000>;
+		};
+	};
+
+	camera_core: regulator_core_supply {
+		compatible = "regulator-fixed";
+		regulator-name = "regulator_camera_core";
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1200000>;
+
+		vin-supply = <&sm5703_buck>;
+
+		gpio = <&msmgpio 33 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-always-on;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&camera_regulator_fixed>;
+	};
+
+	haptics {
+		compatible = "regulator-haptic";
+		haptic-supply = <&sm5703_ldo2>;
+		min-microvolt = <3300000>;
+		max-microvolt = <3300000>;
+	};
+};
+
+&camss {
+	status = "okay";
+
+	ports {
+		port@0 {
+			reg = <0>;
+			csiphy0_ep: endpoint {
+				clock-lanes = <1>;
+				data-lanes = <0 1 2 3>;
+				remote-endpoint = <&ccs_ep_b>;
+			};
+		};
+		port@1 {
+			reg = <1>;
+			csiphy1_ep: endpoint {
+				clock-lanes = <1>;
+				data-lanes = <0 1>;
+				remote-endpoint = <&ccs_ep_f>;
+			};
+		};
+	};
+};
+
+&cci {
+	status = "okay";
+};
+
+// link-freq = width * height * bpp * fps / (2 * nlanes)
+
+&cci_i2c0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+    camera-sensor-back@11 {
+		reg = <0x11>;
+        // compatible = "mipi-ccs-1.0", "mipi-ccs";
+		vio-supply = <&pm8916_l16>;
+        vana-supply = <&sm5703_ldo1>;
+		vcore-supply = <&camera_core>;
+        reset-gpios = <&msmgpio 35 GPIO_ACTIVE_LOW>;
+        clocks = <&gcc GCC_CAMSS_MCLK0_CLK>;
+        clock-frequency = <23880000>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&camera_back_default_a>;
+        port {
+            ccs_ep_b: endpoint {
+                data-lanes = <0 1 2 3>;
+                bus-type = <4>;
+                remote-endpoint = <&csiphy0_ep>;
+                link-frequencies = /bits/ 64 <146000000>;
+            };
+        };
+   };
+    camera-sensor-front@10 {
+		reg = <0x10>;
+        // compatible = "mipi-ccs-1.0", "mipi-ccs";
+		vio-supply = <&pm8916_l16>;
+        vana-supply = <&sm5703_ldo1>;
+		vcore-supply = <&camera_core>;
+        reset-gpios = <&msmgpio 28 GPIO_ACTIVE_LOW>;
+        clocks = <&gcc GCC_CAMSS_MCLK1_CLK>;
+        clock-frequency = <23880000>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&camera_front_default_a>;
+        port {
+            ccs_ep_f: endpoint {
+                data-lanes = <0 1>;
+                bus-type = <4>;
+                remote-endpoint = <&csiphy1_ep>; // 146MHz
+                link-frequencies = /bits/ 64 <1086324736>;
+            };
+        };
+   };
 };
 
 &blsp1_uart2 {
 	status = "okay";
+};
+
+&lpass {
+	status = "okay";
+};
+
+&sound {
+	status = "okay";
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&cdc_pdm_lines_act>;
+	pinctrl-1 = <&cdc_pdm_lines_sus>;
+
+	model = "msm8916";
+	audio-routing =
+		"AMIC1", "MIC BIAS External1",
+		"AMIC2", "Headset Mic",
+		"AMIC3", "MIC BIAS External1";
+
+	dai-link-primary {
+		link-name = "Primary MI2S";
+		cpu {
+			sound-dai = <&lpass MI2S_PRIMARY>;
+		};
+		codec {
+			sound-dai = <&lpass_codec 0>, <&wcd_codec 0>;
+		};
+	};
+
+	dai-link-tertiary {
+		link-name = "Tertiary MI2S";
+		cpu {
+			sound-dai = <&lpass MI2S_TERTIARY>;
+		};
+		codec {
+			sound-dai = <&lpass_codec 1>, <&wcd_codec 1>;
+		};
+	};
+};
+
+&wcd_codec {
+	jack-gpios = <&msmgpio 110 GPIO_ACTIVE_LOW>;
+	qcom,micbias1-ext-cap;
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&jack_default>;
+};
+
+&blsp_i2c5 {
+	status = "okay";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	touchscreen@50 {
+		compatible = "imagis,ist3038c";
+		reg = <0x50>;
+
+		interrupt-parent = <&msmgpio>;
+		interrupts = <13 IRQ_TYPE_EDGE_FALLING>;
+
+		touchscreen-size-x = <720>;
+		touchscreen-size-y = <1280>;
+
+		vdd-supply = <&sm5703_ldo3>;
+		vddio-supply = <&pm8916_l6>;
+	};
 };
 
 &dsi0 {
@@ -119,11 +429,6 @@
 	linux,code = <KEY_VOLUMEDOWN>;
 };
 
-/* FIXME: Replace with SM5703 MUIC when driver is available */
-&pm8916_usbin {
-	status = "okay";
-};
-
 &pronto {
 	status = "okay";
 };
@@ -148,12 +453,12 @@
 
 &usb {
 	status = "okay";
-	dr_mode = "peripheral";
-	extcon = <&pm8916_usbin>;
+	extcon = <&sm5703_extcon>, <&sm5703_extcon>;
+	vbus-supply = <&sm5703_vbus>;
 };
 
 &usb_hs_phy {
-	extcon = <&pm8916_usbin>;
+	extcon = <&sm5703_extcon>;
 	qcom,init-seq = /bits/ 8 <0x1 0x19 0x2 0x0b>;
 };
 
@@ -261,6 +566,14 @@
 };
 
 &msmgpio {
+	mrstb_default: mrstb-default {
+		pins = "gpio24";
+		function = "gpio";
+
+		drive-strength = <2>;
+		bias-disable;
+	};
+
 	accel_int_default: accel-int-default {
 		pins = "gpio115";
 		function = "gpio";
@@ -296,6 +609,38 @@
 
 	sensors_i2c_default: sensors-i2c-default {
 		pins = "gpio31", "gpio32";
+		function = "gpio";
+
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	regulator_i2c_default: regulator-i2c-default {
+		pins = "gpio22", "gpio23";
+		function = "gpio";
+
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	fg_i2c_default: fg-i2c-default {
+		pins = "gpio14", "gpio15";
+		function = "gpio";
+
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	muic_i2c_default: muic-i2c-default {
+		pins = "gpio105", "gpio106";
+		function = "gpio";
+
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	jack_default: jack-default {
+		pins = "gpio110";
 		function = "gpio";
 
 		drive-strength = <2>;
