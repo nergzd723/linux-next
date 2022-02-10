@@ -1371,6 +1371,13 @@ config REGULATOR_VCTRL
 	  This driver provides support for voltage regulators whose output
 	  voltage is controlled by the voltage of another regulator.
 
+config REGULATOR_SM5703
+	tristate "SiliconMitus SM5703 Regulators"
+	depends on OF
+	help
+	  This driver provides support for voltage regulators of SM5703
+	  multi-function device.
+
 config REGULATOR_VEXPRESS
 	tristate "Versatile Express regulators"
 	depends on VEXPRESS_CONFIG
