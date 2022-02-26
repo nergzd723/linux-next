@@ -42,7 +42,7 @@ int __drm_mode_object_add(struct drm_device *dev, struct drm_mode_object *obj,
 {
 	int ret;
 
-	WARN_ON(!dev->driver->load && dev->registered && !obj_free_cb);
+	//WARN_ON(!dev->driver->load && dev->registered && !obj_free_cb);
 
 	mutex_lock(&dev->mode_config.idr_mutex);
 	ret = idr_alloc(&dev->mode_config.object_idr, register_obj ? obj : NULL,
@@ -237,10 +237,10 @@ void drm_object_attach_property(struct drm_mode_object *obj,
 
 
 	if (obj->type == DRM_MODE_OBJECT_CONNECTOR) {
-		struct drm_connector *connector = obj_to_connector(obj);
+		/*struct drm_connector *connector = obj_to_connector(obj);
 
 		WARN_ON(!dev->driver->load &&
-			connector->registration_state == DRM_CONNECTOR_REGISTERED);
+			connector->registration_state == DRM_CONNECTOR_REGISTERED);*/
 	} else {
 		WARN_ON(!dev->driver->load && dev->registered);
 	}
