@@ -110,6 +110,16 @@ static int rmi_f1a_probe(struct rmi_function *fn)
 
 	rmi_dbg(RMI_DEBUG_FN, dev, "%s\n", __func__);
 
+	if (!fn->dev.of_node) {
+		/*
+		 * Some quirky devices (e.g. OnePlus 5T) report supporting F1A
+		 * (Simple capacitive buttons) despite not having the hardware,
+		 * so in case there isn't an associated device-tree node present
+		 * just pretend we probed successfully.
+		 */
+		return 0;
+	}
+
 	f1a = devm_kzalloc(dev, sizeof(struct f1a_data), GFP_KERNEL);
 	if (!f1a)
 		return -ENOMEM;
