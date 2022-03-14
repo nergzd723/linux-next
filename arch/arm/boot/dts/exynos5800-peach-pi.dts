@@ -99,7 +99,7 @@
 		};
 
 		codec {
-			sound-dai = <&max98091>, <&hdmi>;
+			sound-dai = <&max98091>;
 		};
 	};
 
