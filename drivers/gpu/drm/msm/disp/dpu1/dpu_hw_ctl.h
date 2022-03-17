@@ -203,6 +203,7 @@ struct dpu_hw_ctl {
 	u32 pending_flush_mask;
 	u32 pending_intf_flush_mask;
 	u32 pending_merge_3d_flush_mask;
+	bool ctl_no_start_read_quirk;
 
 	/* ops */
 	struct dpu_hw_ctl_ops ops;

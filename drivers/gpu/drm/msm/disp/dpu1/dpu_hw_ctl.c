@@ -94,7 +94,7 @@ static inline void dpu_hw_ctl_trigger_start(struct dpu_hw_ctl *ctx)
 
 static inline bool dpu_hw_ctl_is_started(struct dpu_hw_ctl *ctx)
 {
-	return !!(DPU_REG_READ(&ctx->hw, CTL_START) & BIT(0));
+	return !!(DPU_REG_READ(&ctx->hw, CTL_START) & BIT(0)) || ctx->ctl_no_start_read_quirk;
 }
 
 static inline void dpu_hw_ctl_trigger_pending(struct dpu_hw_ctl *ctx)
@@ -628,6 +628,7 @@ struct dpu_hw_ctl *dpu_hw_ctl_init(enum dpu_ctl idx,
 	c->idx = idx;
 	c->mixer_count = m->mixer_count;
 	c->mixer_hw_caps = m->mixer;
+	c->ctl_no_start_read_quirk = m->ctl_no_start_read_quirk;
 
 	return c;
 }

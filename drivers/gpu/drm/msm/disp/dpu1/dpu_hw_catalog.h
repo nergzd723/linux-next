@@ -743,6 +743,7 @@ struct dpu_mdss_cfg {
 	const struct dpu_mdp_cfg *mdp;
 
 	u32 ctl_count;
+	bool ctl_no_start_read_quirk;
 	const struct dpu_ctl_cfg *ctl;
 
 	u32 sspp_count;

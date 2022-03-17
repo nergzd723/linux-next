@@ -1072,6 +1072,10 @@ static int dpu_kms_hw_init(struct msm_kms *kms)
 		goto power_error;
 	}
 
+	if (of_property_read_bool(dpu_kms->pdev->dev.of_node, "qcom,ctl-no-start-read-quirk")) {
+		dpu_kms->catalog->ctl_no_start_read_quirk = true;
+	}
+
 	/*
 	 * Now we need to read the HW catalog and initialize resources such as
 	 * clocks, regulators, GDSC/MMAGIC, ioremap the register ranges etc
