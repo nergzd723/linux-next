@@ -477,6 +477,9 @@
 
 &mdss_mdp {
 	status = "okay";
+
+	/* It appears CTL_START register always reads back as 0 */
+	qcom,ctl-no-start-read-quirk;
 };
 
 &dsi0 {
