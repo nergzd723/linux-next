@@ -135,7 +135,7 @@ config PINCTRL_AW9523
 	select GENERIC_PINCONF
 	select GPIOLIB
 	select GPIOLIB_IRQCHIP
-	select REGMAP
+	select REGMAP_I2C
 	help
 	  The Awinic AW9523/AW9523B is a multi-function I2C GPIO
 	  expander with PWM functionality. This driver bundles a
