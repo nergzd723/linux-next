@@ -434,6 +434,9 @@ static int aw9523_gpio_irq_type(struct irq_data *d, unsigned int type)
 	switch (type) {
 	case IRQ_TYPE_NONE:
 	case IRQ_TYPE_EDGE_BOTH:
+	case IRQ_TYPE_LEVEL_MASK:
+	case IRQ_TYPE_LEVEL_HIGH:
+	case IRQ_TYPE_LEVEL_LOW:
 		return 0;
 	default:
 		return -EINVAL;
