@@ -82,6 +82,15 @@
 			reg = <0x0 0xf6900000 0x0 0x2000>;
 			no-map;
 		};
+
+		blp637_bat: battery {
+			compatible = "simple-battery";
+			voltage-max-design-microvolt = <4370000>;
+			voltage-min-design-microvolt = <3700000>;
+			charge-full-design-microamp-hours = <3300000>;
+			energy-full-design-microwatt-hours = <12700000>;
+			operating-range-celsius = <0 45>;
+		};
 	};
 
 	gpio-keys {
@@ -276,6 +285,12 @@
 	fuel-gauge@55 {
 		compatible = "ti,bq27411";
 		reg = <0x55>;
+
+		/*
+		 * TODO: Adding this appears to not change any reported stats in:
+		 * $ cat /sys/class/power_supply/bq27411-0/uevent
+		 */
+		monitored-battery = <&blp637_bat>;
 	};
 };
 
