@@ -350,6 +350,13 @@
 	qcom,wave-play-rate-us = <4255>;
 };
 
+&pmi8998_charger {
+	status = "okay";
+
+	monitored-battery = <&blp637_bat>;
+};
+
+// cat /sys/bus/iio/devices/iio:device0/in_current0_*
 &pmi8998_rradc {
 	status = "okay";
 };
