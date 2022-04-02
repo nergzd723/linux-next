@@ -270,6 +270,15 @@
 	};
 };
 
+&blsp2_i2c1 {
+	status = "okay";
+
+	fuel-gauge@55 {
+		compatible = "ti,bq27411";
+		reg = <0x55>;
+	};
+};
+
 &blsp2_i2c3 {
 	status = "disabled";
 
