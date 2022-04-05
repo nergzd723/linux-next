@@ -155,11 +155,11 @@
 };
 
 &apc_cprh {
-	status = "ok";
+	status = "okay";
 };
 
 &cpufreq_hw {
-	status = "ok";
+	status = "okay";
 };
 
 &blsp1_i2c5 {
@@ -575,7 +575,7 @@
 
 /* Adreno 540 GPU */
 &gpucc {
-	status = "ok";
+	status = "okay";
 };
 
 &gpu_mem {
@@ -583,7 +583,7 @@
 };
 
 &adreno_gpu {
-	status = "ok";
+	status = "okay";
 
 	zap-shader {
 		memory-region = <&zap_shader_region>; // gpu_mem?
@@ -605,7 +605,7 @@
 };
 
 &adreno_smmu {
-	status = "ok";
+	status = "okay";
 };
 
 /*
