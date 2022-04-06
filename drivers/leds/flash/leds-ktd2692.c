@@ -163,7 +163,8 @@ static int ktd2692_led_brightness_set(struct led_classdev *led_cdev,
 
 	if (brightness == LED_OFF) {
 		led->mode = KTD2692_MODE_DISABLE;
-		gpiod_direction_output(led->aux_gpio, KTD2692_LOW);
+		if (led->aux_gpio)
+			gpiod_direction_output(led->aux_gpio, KTD2692_LOW);
 	} else {
 		ktd2692_expresswire_write(led, brightness |
 					KTD2692_REG_MOVIE_CURRENT_BASE);
@@ -191,10 +192,12 @@ static int ktd2692_led_flash_strobe_set(struct led_classdev_flash *fled_cdev,
 				| KTD2692_REG_FLASH_TIMEOUT_BASE);
 
 		led->mode = KTD2692_MODE_FLASH;
-		gpiod_direction_output(led->aux_gpio, KTD2692_HIGH);
+		if (led->aux_gpio)
+			gpiod_direction_output(led->aux_gpio, KTD2692_HIGH);
 	} else {
 		led->mode = KTD2692_MODE_DISABLE;
-		gpiod_direction_output(led->aux_gpio, KTD2692_LOW);
+		if (led->aux_gpio)
+			gpiod_direction_output(led->aux_gpio, KTD2692_LOW);
 	}
 
 	ktd2692_expresswire_write(led, led->mode | KTD2692_REG_MODE_BASE);
@@ -248,7 +251,8 @@ static void ktd2692_setup(struct ktd2692_context *led)
 {
 	led->mode = KTD2692_MODE_DISABLE;
 	ktd2692_expresswire_reset(led);
-	gpiod_direction_output(led->aux_gpio, KTD2692_LOW);
+	if (led->aux_gpio)
+		gpiod_direction_output(led->aux_gpio, KTD2692_LOW);
 
 	ktd2692_expresswire_write(led, (KTD2692_MM_MIN_CURR_THRESHOLD_SCALE - 1)
 				 | KTD2692_REG_MM_MIN_CURR_THRESHOLD_BASE);
@@ -286,10 +290,8 @@ static int ktd2692_parse_dt(struct ktd2692_context *led, struct device *dev,
 
 	led->aux_gpio = devm_gpiod_get(dev, "aux", GPIOD_ASIS);
 	ret = PTR_ERR_OR_ZERO(led->aux_gpio);
-	if (ret) {
-		dev_err(dev, "cannot get aux-gpios %d\n", ret);
-		return ret;
-	}
+	if (ret)
+		dev_info(dev, "aux-gpios not available, flash mode current might be reduced\n");
 
 	led->regulator = devm_regulator_get(dev, "vin");
 	if (IS_ERR(led->regulator))
