@@ -1226,6 +1226,20 @@ config MFD_SM501
 	  interface. The device may be connected by PCI or local bus with
 	  varying functions enabled.
 
+config MFD_SM5703
+	tristate "Silicon Mitus SM5703"
+	depends on I2C
+	select MFD_CORE
+	select REGMAP_I2C
+	select REGMAP_IRQ
+	help
+	  This is the core driver for the Silicon Motion SM501 multimedia
+	  companion chip. This device is a multifunction device which may
+	  provide numerous interfaces including USB host controller, USB gadget,
+	  asynchronous serial ports, audio functions, and a dual display video
+	  interface. The device may be connected by PCI or local bus with
+	  varying functions enabled.
+
 config MFD_SM501_GPIO
 	bool "Export GPIO via GPIO layer"
 	depends on MFD_SM501 && GPIOLIB
