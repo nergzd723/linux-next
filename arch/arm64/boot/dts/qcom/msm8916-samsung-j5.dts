@@ -115,6 +115,7 @@
 					sm5703_ldo1: ldo1 {
 						regulator-min-microvolt = <2800000>;
 						regulator-max-microvolt = <2800000>;
+						regulator-always-on;
 					};
 
 					sm5703_ldo2: ldo2 {
@@ -140,6 +141,12 @@
 					sm5703_vbus: vbus {
 						regulator-min-microvolt = <4800000>;
 						regulator-max-microvolt = <4800000>;
+					};
+	
+					sm5703_buck: buck {
+						regulator-min-microvolt = <1500000>;
+						regulator-max-microvolt = <1500000>;
+						regulator-always-on;
 					};
 				};
 			};
@@ -281,7 +288,7 @@
 
     camera-sensor-back@11 {
 		reg = <0x11>;
-        // compatible = "mipi-ccs-1.0", "mipi-ccs";
+        compatible = "mipi-ccs-1.0", "mipi-ccs";
 		vio-supply = <&pm8916_l16>;
         vana-supply = <&sm5703_ldo1>;
 		vcore-supply = <&camera_core>;
@@ -301,7 +308,7 @@
    };
     camera-sensor-front@10 {
 		reg = <0x10>;
-        // compatible = "mipi-ccs-1.0", "mipi-ccs";
+        compatible = "mipi-ccs-1.0", "mipi-ccs";
 		vio-supply = <&pm8916_l16>;
         vana-supply = <&sm5703_ldo1>;
 		vcore-supply = <&camera_core>;
@@ -518,8 +525,9 @@
 	};
 
 	l10 {
-		regulator-min-microvolt = <2700000>;
+		regulator-min-microvolt = <2800000>;
 		regulator-max-microvolt = <2800000>;
+		regulator-always-on; // autofocus
 	};
 
 	l11 {
@@ -552,6 +560,7 @@
 	l16 {
 		regulator-min-microvolt = <1800000>;
 		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
 	};
 
 	l17 {
@@ -645,5 +654,47 @@
 
 		drive-strength = <2>;
 		bias-disable;
+	};
+
+	camera_regulator_fixed: camera-regulator-fixed {
+		pins = "gpio33";
+		function = "gpio";
+
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	camera_front_default_a: camera-front-default-a {
+		rst {
+			pins = "gpio28";
+			function = "gpio";
+
+			drive-strength = <16>;
+			bias-disable;
+		};
+		mclk1 {
+			pins = "gpio27";
+			function = "cam_mclk1";
+
+			drive-strength = <16>;
+			bias-disable;
+		};
+	};
+
+	camera_back_default_a: camera-back-default-a {
+		rst {
+			pins = "gpio35";
+			function = "gpio";
+
+			drive-strength = <16>;
+			bias-disable;
+		};
+		mclk0 {
+			pins = "gpio26";
+			function = "cam_mclk0";
+
+			drive-strength = <16>;
+			bias-disable;
+		};
 	};
 };
