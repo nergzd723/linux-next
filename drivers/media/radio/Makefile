@@ -4,6 +4,7 @@
 #
 
 obj-$(CONFIG_RADIO_ISA) += radio-isa.o
+obj-$(CONFIG_RADIO_IRIS) += radio-iris.o
 obj-$(CONFIG_RADIO_AZTECH) += radio-aztech.o
 obj-$(CONFIG_RADIO_RTRACK2) += radio-rtrack2.o
 obj-$(CONFIG_RADIO_SF16FMI) += radio-sf16fmi.o
