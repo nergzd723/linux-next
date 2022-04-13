@@ -110,3 +110,4 @@ obj-$(CONFIG_BATTERY_ACER_A500)	+= acer_a500_battery.o
 obj-$(CONFIG_BATTERY_SURFACE)	+= surface_battery.o
 obj-$(CONFIG_CHARGER_SURFACE)	+= surface_charger.o
 obj-$(CONFIG_BATTERY_SM5703)	+= sm5703-fg.o
+obj-$(CONFIG_CHARGER_SM5703)	+= sm5703_charger.o
