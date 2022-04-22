@@ -402,14 +402,6 @@
 	status = "okay";
 };
 
-&mmcc {
-	status = "ok";
-};
-
-&mmss_smmu {
-	status = "ok";
-};
-
 &pm8005_regulators {
 	/* VDD_GFX supply */
 	pm8005_s1: s1 {

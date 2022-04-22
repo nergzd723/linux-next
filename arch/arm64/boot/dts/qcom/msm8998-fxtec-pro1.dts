@@ -516,10 +516,6 @@
 	firmware-name = "qcom/msm8998/fxtec/slpi_v2.mbn";
 };
 
-&mmcc {
-	status = "okay";
-};
-
 &etf {
 	status = "okay";
 };
