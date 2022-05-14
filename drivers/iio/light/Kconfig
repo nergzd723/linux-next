@@ -482,6 +482,18 @@ config TCS3472
 	  This driver can also be built as a module.  If so, the module
 	  will be called tcs3472.
 
+config TCS3490
+	tristate "AMS TCS3490 color light-to-digital converter"
+	depends on I2C
+	select IIO_BUFFER
+	select IIO_TRIGGERED_BUFFER
+	help
+	  Say Y here if you have an AMS TCS3490 color light-to digital converter
+	  which provides RGB color and IR light sensing.
+
+	  This driver can also be built as a module.  If so, the module
+	  will be called tcs3490.
+
 config SENSORS_TSL2563
 	tristate "TAOS TSL2560, TSL2561, TSL2562 and TSL2563 ambient light sensors"
 	depends on I2C
