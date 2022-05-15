@@ -12,6 +12,18 @@
 	model = "Sony Xperia XZ1";
 	compatible = "sony,xperia-poplar", "qcom,msm8998";
 	chassis-type = "handset";
+
+	disp_dvdd_vreg: disp-dvdd-vreg {
+		compatible = "regulator-fixed";
+		regulator-name = "disp_dvdd_en";
+		regulator-min-microvolt = <1350000>;
+		regulator-max-microvolt = <1350000>;
+		startup-delay-us = <0>;
+		enable-active-high;
+		gpio = <&pmi8998_gpio 10 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&disp_dvdd_en>;
+	};
 };
 
 &ibb {
@@ -31,11 +43,29 @@
 };
 
 &vreg_l18a_2p85 {
-	regulator-min-microvolt = <2850000>;
-	regulator-max-microvolt = <2850000>;
+	regulator-min-microvolt = <2848000>;
+	regulator-max-microvolt = <2848000>;
 };
 
 &vreg_l22a_2p85 {
-	regulator-min-microvolt = <2700000>;
-	regulator-max-microvolt = <2700000>;
+	regulator-min-microvolt = <2696000>;
+	regulator-max-microvolt = <2696000>;
+};
+
+&pmi8998_gpio {
+	disp_dvdd_en: disp-dvdd-en-active {
+		pins = "gpio10";
+		function = "normal";
+		bias-disable;
+		drive-push-pull;
+		output-high;
+		power-source = <0>;
+		qcom,drive-strength = <1>;
+	};
+};
+
+&panel {
+ 	compatible = "mdss,panel9";
+
+	dvdd-supply = <&disp_dvdd_vreg>;
 };
