@@ -340,8 +340,39 @@
 	vdds-supply = <&vreg_l1a_0p875>;
 };
 
+&dsi1_phy {
+	vdds-supply = <&vreg_l1a_0p875>;
+	status = "okay";
+};
+
+&mmcc {
+	status = "okay";
+};
+
+&mmss_smmu {
+	status = "okay";
+};
+
+&mdss {
+	status = "okay";
+};
+
+&mdss_mdp {
+	status = "okay";
+	qcom,ctl-no-start-read-quirk;
+};
+
+/* Adreno 540 GPU */
 &gpucc {
-	status = "ok";
+	status = "okay";
+};
+
+&adreno_smmu {
+	status = "okay";
+};
+
+&adreno_gpu {
+	status = "okay";
 };
 
 &ibb {
@@ -373,26 +404,6 @@
 	qcom,bypass-cbndx = /bits/ 8 <11>;
 	qcom,reset-nodisable-cbs = /bits/ 8 <12>;
 
-	status = "ok";
-};
-
-&mmcc {
-	status = "ok";
-};
-
-&mmss_smmu {
-	status = "ok";
-};
-
-&mdss {
-	status = "okay";
-};
-
-&mmcc {
-	status = "ok";
-};
-
-&mmss_smmu {
 	status = "ok";
 };
 
