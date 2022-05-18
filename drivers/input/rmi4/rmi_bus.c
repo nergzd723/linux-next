@@ -26,16 +26,14 @@ void rmi_dbg(int flags, struct device *dev, const char *fmt, ...)
 	struct va_format vaf;
 	va_list args;
 
-	if (flags & debug_flags) {
-		va_start(args, fmt);
+	va_start(args, fmt);
 
-		vaf.fmt = fmt;
-		vaf.va = &args;
+	vaf.fmt = fmt;
+	vaf.va = &args;
 
-		dev_printk(KERN_DEBUG, dev, "%pV", &vaf);
+	dev_printk(KERN_CRIT, dev, "%pV", &vaf);
 
-		va_end(args);
-	}
+	va_end(args);
 }
 EXPORT_SYMBOL_GPL(rmi_dbg);
 

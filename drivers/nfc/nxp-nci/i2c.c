@@ -13,6 +13,7 @@
  */
 
 #include <linux/acpi.h>
+#include <linux/clk.h>
 #include <linux/delay.h>
 #include <linux/i2c.h>
 #include <linux/interrupt.h>
@@ -35,7 +36,7 @@ struct nxp_nci_i2c_phy {
 
 	struct gpio_desc *gpiod_en;
 	struct gpio_desc *gpiod_fw;
-
+	struct clk *clk;
 	int hard_fault; /*
 			 * < 0 if hardware error occurred (e.g. i2c err)
 			 * and prevents normal operation.
@@ -291,6 +292,13 @@ static int nxp_nci_i2c_probe(struct i2c_client *client,
 		nfc_err(dev, "Failed to get FW gpio\n");
 		return PTR_ERR(phy->gpiod_fw);
 	}
+
+	phy->clk = devm_clk_get(&client->dev, NULL);
+	if (IS_ERR(phy->clk))
+		return dev_err_probe(&client->dev, PTR_ERR(phy->clk), "Failed to get clocks");
+	r = clk_prepare_enable(phy->clk);
+	if (r)
+		dev_err(&client->dev, "Failed to enable clock: %d\n", r);
 
 	r = nxp_nci_probe(phy, &client->dev, &i2c_phy_ops,
 			  NXP_NCI_I2C_MAX_PAYLOAD, &phy->ndev);

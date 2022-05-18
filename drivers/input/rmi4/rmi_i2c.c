@@ -4,6 +4,7 @@
  * Copyright (c) 2011 Unixphere
  */
 
+#include <linux/gpio/consumer.h>
 #include <linux/i2c.h>
 #include <linux/rmi.h>
 #include <linux/of.h>
@@ -219,6 +220,8 @@ static int rmi_i2c_probe(struct i2c_client *client,
 
 	pdata->irq = client->irq;
 
+	dev_err(&client->dev, "client->irq: %d", client->irq);
+
 	rmi_dbg(RMI_DEBUG_XPORT, &client->dev, "Probing %s.\n",
 			dev_name(&client->dev));
 
@@ -258,6 +261,15 @@ static int rmi_i2c_probe(struct i2c_client *client,
 	rmi_i2c->xport.dev = &client->dev;
 	rmi_i2c->xport.proto_name = "i2c";
 	rmi_i2c->xport.ops = &rmi_i2c_ops;
+
+	struct gpio_desc *reset_gpio;
+
+	reset_gpio = devm_gpiod_get_optional(&client->dev, "reset", GPIOD_ASIS);
+	if (IS_ERR(reset_gpio))
+		dev_err(&client->dev, "No reset gpio?");
+	dev_err(&client->dev, "found reset gpio");
+	gpiod_set_value_cansleep(reset_gpio, 1);
+	msleep(20);
 
 	i2c_set_clientdata(client, rmi_i2c);
 

@@ -248,7 +248,7 @@ static int gp2ap002_read_raw(struct iio_dev *indio_dev,
 			   int *val, int *val2, long mask)
 {
 	struct gp2ap002 *gp2ap002 = iio_priv(indio_dev);
-	int ret;
+	int ret, val;
 
 	pm_runtime_get_sync(gp2ap002->dev);
 
@@ -260,6 +260,14 @@ static int gp2ap002_read_raw(struct iio_dev *indio_dev,
 			if (ret < 0)
 				return ret;
 			*val = ret;
+			ret = IIO_VAL_INT;
+			goto out;
+		case IIO_PROXIMITY:
+			ret = regmap_read(gp2ap002->map, GP2AP002_PROX, &val);
+
+			if (val & GP2AP002_PROX_VO_DETECT)
+				*val = 0;
+			else *val = 1;
 			ret = IIO_VAL_INT;
 			goto out;
 		default:
@@ -380,6 +388,8 @@ static const struct iio_chan_spec gp2ap002_channels[] = {
 		.type = IIO_PROXIMITY,
 		.event_spec = gp2ap002_events,
 		.num_event_specs = ARRAY_SIZE(gp2ap002_events),
+		.info_mask_separate = BIT(IIO_CHAN_INFO_RAW),
+		.channel = GP2AP002_PROX_CHANNEL,
 	},
 	{
 		.type = IIO_LIGHT,

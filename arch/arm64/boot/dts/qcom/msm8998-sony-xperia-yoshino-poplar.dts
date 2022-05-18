@@ -36,3 +36,73 @@
 	regulator-min-microvolt = <2696000>;
 	regulator-max-microvolt = <2696000>;
 };
+
+
+&tlmm {
+	panel_reset_n: panel-rst-n {
+		pins = "gpio94";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-disable;
+	};
+
+	nfc_int_active: nfc-int-active {
+		pins = "gpio92";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+		input-enable;
+	};
+
+	nfc_enable_active: nfc-enable-active {
+		pins = "gpio12";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+		output-low;
+	};
+};
+
+&pmi8998_wled {
+    status = "okay";
+
+    default-brightness = <1200>;
+    qcom,switching-freq = <800>;
+    qcom,ovp-millivolt = <29600>;
+    qcom,current-boost-limit = <620>;
+    qcom,current-limit-microamp = <20000>;
+    qcom,num-strings = <2>;
+};
+
+&pm8998_gpio {
+	nfc_clock_req: nfc-clock-req {
+		pins = "gpio21";
+		function = PMIC_GPIO_FUNC_FUNC1;
+		bias-pull-down;
+		input-enable;
+		qcom,drive-strength = <PMIC_GPIO_STRENGTH_NO>;
+	};
+};
+
+&blsp2_i2c1 {
+	status = "okay";
+
+	nfc@28 {
+		compatible = "nxp,nxp-nci-i2c";
+		reg = <0x28>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <92 IRQ_TYPE_LEVEL_HIGH>;
+
+		enable-gpios = <&tlmm 12 GPIO_ACTIVE_LOW>;
+
+		clocks = <&rpmcc RPM_SMD_LN_BB_CLK3_PIN>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&nfc_int_active &nfc_enable_active &nfc_clock_req>;
+	};
+};
+
+&blsp1_i2c1 {
+	status = "okay";
+};

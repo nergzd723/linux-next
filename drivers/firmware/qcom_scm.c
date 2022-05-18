@@ -514,6 +514,30 @@ int qcom_scm_pas_mem_setup(u32 peripheral, phys_addr_t addr, phys_addr_t size)
 }
 EXPORT_SYMBOL(qcom_scm_pas_mem_setup);
 
+int qcom_unlock_ownership(u32 blspid)
+{
+	int ret;
+	struct qcom_scm_desc desc = {
+		.svc = 4,
+		.cmd = 3,
+		.arginfo = QCOM_SCM_ARGS(2),
+		.args[0] = blspid,
+		.args[1] = 1,
+		.owner = ARM_SMCCC_OWNER_SIP,
+	};
+	struct qcom_scm_res res;
+
+	ret = qcom_scm_clk_enable();
+	if (ret)
+		return ret;
+
+	ret = qcom_scm_call(__scm->dev, &desc, &res);
+	qcom_scm_clk_disable();
+
+	return ret ? : res.result[0];
+}
+EXPORT_SYMBOL(qcom_unlock_ownership);
+
 /**
  * qcom_scm_pas_auth_and_reset() - Authenticate the given peripheral firmware
  *				   and reset the remote processor

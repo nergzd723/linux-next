@@ -1,8 +1,11 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 #include <linux/delay.h>
 #include <linux/i2c.h>
 #include <linux/interrupt.h>
 #include <linux/module.h>
 
+#include <linux/arm-smccc.h>
 #include <linux/gpio/consumer.h>
 #include <linux/iio/iio.h>
 
@@ -30,19 +33,19 @@
 #define TCS3490_GREEN_BASE		0x98
 #define TCS3490_BLUE_BASE		0x9a
 
-#define TCS3490_ADC_CYCLE_US		3000
-
 #define TCS3490_GAIN_MASK		0x3
 
 #define TCS3490_LIGHT_CHANNEL(_color, _idx) {		\
 	.type = IIO_INTENSITY,				\
 	.info_mask_separate = BIT(IIO_CHAN_INFO_RAW),	\
-	.info_mask_shared_by_type = 			\
+	.info_mask_shared_by_type =			\
 			BIT(IIO_CHAN_INFO_CALIBSCALE),	\
 	.address = _idx,				\
 	.modified = 1,					\
 	.channel2 = IIO_MOD_LIGHT_##_color,		\
 }							\
+
+extern int qcom_unlock_ownership(u32 blspid);
 
 struct tcs3490 {
 	struct i2c_client *client;
@@ -50,19 +53,11 @@ struct tcs3490 {
 	struct regulator *vdd_supply;
 };
 
-enum tcs3490_gain_sel {
-	TCS3490_GAIN_X1,
-	TCS3490_GAIN_X4,
-	TCS3490_GAIN_X16,
-	TCS3490_GAIN_X64,
-	TCS3490_GAIN_MAX,
-};
-
 const unsigned int tcs3490_gain_multiplier[] = {1, 4, 16, 64};
 
 static const struct regmap_config tcs3490_regmap_config = {
-    .reg_bits       = 8,
-    .val_bits       = 8,
+	.reg_bits	= 8,
+	.val_bits	= 8,
 };
 
 static const struct iio_chan_spec tcs3490_channels[] = {
@@ -92,12 +87,12 @@ static int tcs3490_set_gain(struct tcs3490 *data, unsigned int gain)
 {
 	int ret, i;
 
-	for (i = 0; i < TCS3490_GAIN_MAX; i++) {
+	for (i = 0; i < ARRAY_SIZE(tcs3490_gain_multiplier); i++) {
 		if (tcs3490_gain_multiplier[i] == gain)
 			break;
 	}
 
-	if (i == TCS3490_GAIN_MAX)
+	if (i == ARRAY_SIZE(tcs3490_gain_multiplier))
 		return -EINVAL;
 
 	ret = regmap_write(data->regmap, TCS3490_GAIN_CTRL, i);
@@ -108,8 +103,8 @@ static int tcs3490_set_gain(struct tcs3490 *data, unsigned int gain)
 }
 
 static int tcs3490_read_channel(struct tcs3490 *data,
-				  const struct iio_chan_spec *chan,
-				  int *val) 
+				const struct iio_chan_spec *chan,
+				int *val)
 {
 	unsigned int tries = 20;
 	unsigned int val_l, val_h, status;
@@ -119,24 +114,24 @@ static int tcs3490_read_channel(struct tcs3490 *data,
 			   TCS3490_POWER_ON_INTERNAL | TCS3490_ADC_ENABLE);
 	if (ret)
 		return ret;
-	
+
 	switch (chan->channel2) {
-		case IIO_MOD_LIGHT_RED:
-		case IIO_MOD_LIGHT_GREEN:
-		case IIO_MOD_LIGHT_BLUE:
-			break;
-		case IIO_MOD_LIGHT_CLEAR:
-			ret = regmap_write(data->regmap, TCS3490_CLEAR_IR_MODE, TCS3490_MODE_CLEAR);
-			break;
-		case IIO_MOD_LIGHT_IR:
-			ret = regmap_write(data->regmap, TCS3490_CLEAR_IR_MODE, TCS3490_MODE_IR);
-			break;
-		default:
-			return -EINVAL;
+	case IIO_MOD_LIGHT_RED:
+	case IIO_MOD_LIGHT_GREEN:
+	case IIO_MOD_LIGHT_BLUE:
+		break;
+	case IIO_MOD_LIGHT_CLEAR:
+		ret = regmap_write(data->regmap, TCS3490_CLEAR_IR_MODE, TCS3490_MODE_CLEAR);
+		break;
+	case IIO_MOD_LIGHT_IR:
+		ret = regmap_write(data->regmap, TCS3490_CLEAR_IR_MODE, TCS3490_MODE_IR);
+		break;
+	default:
+		return -EINVAL;
 	}
 
 	do {
-		usleep_range(TCS3490_ADC_CYCLE_US, TCS3490_ADC_CYCLE_US);
+		usleep_range(3000, 4000);
 
 		ret = regmap_read(data->regmap, TCS3490_STATUS, &status);
 		if (ret)
@@ -194,8 +189,8 @@ static int tcs3490_read_raw(struct iio_dev *indio_dev,
 }
 
 static int tcs3490_write_raw(struct iio_dev *indio_dev,
-			       struct iio_chan_spec const *chan,
-			       int val, int val2, long mask)
+			     struct iio_chan_spec const *chan,
+			     int val, int val2, long mask)
 {
 	struct tcs3490 *data = iio_priv(indio_dev);
 
@@ -210,12 +205,13 @@ static const struct iio_info tcs3490_info = {
 	.write_raw = tcs3490_write_raw,
 };
 
-static int tcs3490_probe (struct i2c_client *client) {
+static int tcs3490_probe(struct i2c_client *client)
+{
 	struct tcs3490 *data;
 	struct iio_dev *indio_dev;
 	int ret;
 
-	indio_dev = devm_iio_device_alloc(dev, sizeof(*data));
+	indio_dev = devm_iio_device_alloc(&client->dev, sizeof(*data));
 	if (!indio_dev)
 		return -ENOMEM;
 
@@ -230,7 +226,7 @@ static int tcs3490_probe (struct i2c_client *client) {
 
 	data->regmap = devm_regmap_init_i2c(client, &tcs3490_regmap_config);
 	if (IS_ERR(data->regmap))
-		return dev_err_probe(dev, PTR_ERR(data->regmap),
+		return dev_err_probe(&client->dev, PTR_ERR(data->regmap),
 				     "Failed to register the register map\n");
 
 	ret = regulator_enable(data->vdd_supply);
@@ -271,4 +267,4 @@ module_i2c_driver(tcs3490_driver);
 
 MODULE_DESCRIPTION("AMS TCS3490 RGBC/IR Light Sensor driver");
 MODULE_AUTHOR("Markuss Broks <markuss.broks@gmail.com>");
-MODULE_LICENSE("GPL"); 
+MODULE_LICENSE("GPL");

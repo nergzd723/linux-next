@@ -8,6 +8,7 @@
 #include <linux/rmi.h>
 #include <linux/slab.h>
 #include <linux/uaccess.h>
+#include <linux/delay.h>
 #include <linux/of.h>
 #include <asm/unaligned.h>
 #include "rmi_driver.h"
@@ -409,6 +410,14 @@ static int rmi_f01_probe(struct rmi_function *fn)
 	 * in the device control register.
 	 */
 
+	error = rmi_write(rmi_dev, fn->fd.control_base_addr, 1);
+	if (error) {
+		dev_err(&fn->dev, "Failed to reset: %d\n", error);
+		return error;
+	}
+
+	msleep(20);
+
 	error = rmi_read(rmi_dev, fn->fd.control_base_addr,
 			 &f01->device_control.ctrl0);
 	if (error) {
@@ -436,7 +445,7 @@ static int rmi_f01_probe(struct rmi_function *fn)
 			RMI_SLEEP_MODE_NORMAL) {
 		dev_warn(&fn->dev,
 			 "WARNING: Non-zero sleep mode found. Clearing...\n");
-		f01->device_control.ctrl0 &= ~RMI_F01_CTRL0_SLEEP_MODE_MASK;
+//		f01->device_control.ctrl0 &= ~RMI_F01_CTRL0_SLEEP_MODE_MASK;
 	}
 
 	f01->device_control.ctrl0 |= RMI_F01_CTRL0_CONFIGURED_BIT;
