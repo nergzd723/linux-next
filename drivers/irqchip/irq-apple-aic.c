@@ -245,7 +245,28 @@ struct aic_info {
 	u32 die_stride;
 
 	/* Features */
+	bool el2_regs;
 	bool fast_ipi;
+	bool ipi_regs;
+	bool uncore2_regs;
+};
+
+/* For A7-A8X SoCs */
+static const struct aic_info aic1_legacy_noel2_info = {
+	.version	= 1,
+
+	.event		= AIC_EVENT,
+	.target_cpu	= AIC_TARGET_CPU,
+};
+
+/* For A9-A12 SoCs */
+static const struct aic_info aic1_legacy_info = {
+	.version	= 1,
+
+	.event		= AIC_EVENT,
+	.target_cpu	= AIC_TARGET_CPU,
+
+	.el2_regs	= true,
 };
 
 static const struct aic_info aic1_info = {
@@ -253,6 +274,10 @@ static const struct aic_info aic1_info = {
 
 	.event		= AIC_EVENT,
 	.target_cpu	= AIC_TARGET_CPU,
+
+	.el2_regs	= true,
+	.ipi_regs	= true,
+	.uncore2_regs	= true,
 };
 
 static const struct aic_info aic1_fipi_info = {
@@ -261,7 +286,10 @@ static const struct aic_info aic1_fipi_info = {
 	.event		= AIC_EVENT,
 	.target_cpu	= AIC_TARGET_CPU,
 
+	.el2_regs	= true,
 	.fast_ipi	= true,
+	.ipi_regs	= true,
+	.uncore2_regs	= true,
 };
 
 static const struct aic_info aic2_info = {
@@ -269,10 +297,21 @@ static const struct aic_info aic2_info = {
 
 	.irq_cfg	= AIC2_IRQ_CFG,
 
+	.el2_regs	= true,
 	.fast_ipi	= true,
+	.ipi_regs	= true,
+	.uncore2_regs	= true,
 };
 
 static const struct of_device_id aic_info_match[] = {
+	{
+		.compatible = "apple,s5l8960x-aic",
+		.data = &aic1_legacy_noel2_info,
+	},
+	{
+		.compatible = "apple,t7000-aic",
+		.data = &aic1_legacy_noel2_info,
+	},
 	{
 		.compatible = "apple,t8103-aic",
 		.data = &aic1_fipi_info,
@@ -452,6 +491,9 @@ static unsigned long aic_fiq_get_idx(struct irq_data *d)
 
 static void aic_fiq_set_mask(struct irq_data *d)
 {
+	if (!aic_irqc->info.el2_regs)
+		return;
+
 	/* Only the guest timers have real mask bits, unfortunately. */
 	switch (aic_fiq_get_idx(d)) {
 	case AIC_TMR_EL02_PHYS:
@@ -469,6 +511,9 @@ static void aic_fiq_set_mask(struct irq_data *d)
 
 static void aic_fiq_clear_mask(struct irq_data *d)
 {
+	if (!aic_irqc->info.el2_regs)
+		return;
+
 	switch (aic_fiq_get_idx(d)) {
 	case AIC_TMR_EL02_PHYS:
 		sysreg_clear_set_s(SYS_IMP_APL_VM_TMR_FIQ_ENA_EL2, 0, VM_TMR_FIQ_ENABLE_P);
@@ -524,12 +569,14 @@ static void __exception_irq_entry aic_handle_fiq(struct pt_regs *regs)
 	 * we check for everything here, even things we don't support yet.
 	 */
 
-	if (read_sysreg_s(SYS_IMP_APL_IPI_SR_EL1) & IPI_SR_PENDING) {
-		if (static_branch_likely(&use_fast_ipi)) {
-			aic_handle_ipi(regs);
-		} else {
-			pr_err_ratelimited("Fast IPI fired. Acking.\n");
-			write_sysreg_s(IPI_SR_PENDING, SYS_IMP_APL_IPI_SR_EL1);
+	if (aic_irqc->info.ipi_regs) {
+		if (read_sysreg_s(SYS_IMP_APL_IPI_SR_EL1) & IPI_SR_PENDING) {
+			if (static_branch_likely(&use_fast_ipi)) {
+				aic_handle_ipi(regs);
+			} else {
+				pr_err_ratelimited("Fast IPI fired. Acking.\n");
+				write_sysreg_s(IPI_SR_PENDING, SYS_IMP_APL_IPI_SR_EL1);
+			}
 		}
 	}
 
@@ -566,12 +613,14 @@ static void __exception_irq_entry aic_handle_fiq(struct pt_regs *regs)
 					  AIC_FIQ_HWIRQ(irq));
 	}
 
-	if (FIELD_GET(UPMCR0_IMODE, read_sysreg_s(SYS_IMP_APL_UPMCR0_EL1)) == UPMCR0_IMODE_FIQ &&
-			(read_sysreg_s(SYS_IMP_APL_UPMSR_EL1) & UPMSR_IACT)) {
-		/* Same story with uncore PMCs */
-		pr_err_ratelimited("Uncore PMC FIQ fired. Masking.\n");
-		sysreg_clear_set_s(SYS_IMP_APL_UPMCR0_EL1, UPMCR0_IMODE,
-				   FIELD_PREP(UPMCR0_IMODE, UPMCR0_IMODE_OFF));
+	if (aic_irqc->info.uncore2_regs) {
+		if (FIELD_GET(UPMCR0_IMODE, read_sysreg_s(SYS_IMP_APL_UPMCR0_EL1)) == UPMCR0_IMODE_FIQ &&
+				(read_sysreg_s(SYS_IMP_APL_UPMSR_EL1) & UPMSR_IACT)) {
+			/* Same story with uncore PMCs */
+			pr_err_ratelimited("Uncore PMC FIQ fired. Masking.\n");
+			sysreg_clear_set_s(SYS_IMP_APL_UPMCR0_EL1, UPMCR0_IMODE,
+					FIELD_PREP(UPMCR0_IMODE, UPMCR0_IMODE_OFF));
+		}
 	}
 }
 
@@ -944,7 +993,8 @@ static int aic_init_cpu(unsigned int cpu)
 	/* Mask all hard-wired per-CPU IRQ/FIQ sources */
 
 	/* Pending Fast IPI FIQs */
-	write_sysreg_s(IPI_SR_PENDING, SYS_IMP_APL_IPI_SR_EL1);
+	if (aic_irqc->info.ipi_regs)
+		write_sysreg_s(IPI_SR_PENDING, SYS_IMP_APL_IPI_SR_EL1);
 
 	/* Timer FIQs */
 	sysreg_clear_set(cntp_ctl_el0, 0, ARCH_TIMER_CTRL_IT_MASK);
@@ -965,8 +1015,9 @@ static int aic_init_cpu(unsigned int cpu)
 			   FIELD_PREP(PMCR0_IMODE, PMCR0_IMODE_OFF));
 
 	/* Uncore PMC FIQ */
-	sysreg_clear_set_s(SYS_IMP_APL_UPMCR0_EL1, UPMCR0_IMODE,
-			   FIELD_PREP(UPMCR0_IMODE, UPMCR0_IMODE_OFF));
+	if (aic_irqc->info.uncore2_regs)
+		sysreg_clear_set_s(SYS_IMP_APL_UPMCR0_EL1, UPMCR0_IMODE,
+				   FIELD_PREP(UPMCR0_IMODE, UPMCR0_IMODE_OFF));
 
 	/* Commit all of the above */
 	isb();
@@ -1133,8 +1184,9 @@ static int __init aic_of_ic_init(struct device_node *node, struct device_node *p
 
 	irq_domain_update_bus_token(irqc->hw_domain, DOMAIN_BUS_WIRED);
 
-	if (aic_init_smp(irqc, node))
-		goto err_remove_domain;
+	if (!of_device_is_compatible(node, "apple,aic-nofastipi"))
+		if (aic_init_smp(irqc, node))
+			goto err_remove_domain;
 
 	affs = of_get_child_by_name(node, "affinities");
 	if (affs) {
