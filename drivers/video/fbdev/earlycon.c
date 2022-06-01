@@ -18,8 +18,9 @@
 static const struct console *earlycon_console __initdata;
 static const struct font_desc *font;
 static u32 simplefb_x, simplefb_y;
-static u32 fb_base;
+static u64 fb_base;
 static void *simplefb_fb;
+struct screen_info screen_info;
 
 static int __init simplefb_earlycon_remap_fb(void)
 {
@@ -124,6 +125,20 @@ static void simplefb_earlycon_write_char(u32 *dst, unsigned char c, unsigned int
 	}
 }
 
+void
+cache_clean(void *address, size_t size) { // invalidates too, because Apple
+    uint64_t cache_line_size = 64;
+    uint64_t start = ((uintptr_t) address) & ~(cache_line_size - 1);
+    uint64_t end = ((uintptr_t) address + size + cache_line_size - 1) & ~(cache_line_size - 1);
+    asm volatile("isb");
+    asm volatile("dsb sy");
+    for (uint64_t addr = start; addr < end; addr += cache_line_size) {
+        asm volatile("dc civac, %0" : : "r"(addr));
+    }
+    asm volatile("dsb sy");
+    asm volatile("isb");
+}
+
 static void
 simplefb_earlycon_write(struct console *con, const char *str, unsigned int num)
 {
@@ -215,11 +230,11 @@ static int __init simplefb_earlycon_setup(struct earlycon_device *device,
 	if (ret != 2)
 		return -ENODEV;
 
-    si->lfb_linelength = xres * 4;
-    si->lfb_width = xres;
-    si->lfb_height = yres;
-    si->lfb_depth = 32;
-    si->lfb_size = si->lfb_width * si->lfb_height * (si->lfb_depth / 8);
+	si->lfb_linelength = xres * 4;
+	si->lfb_width = xres;
+	si->lfb_height = yres;
+	si->lfb_depth = 32;
+	si->lfb_size = si->lfb_width * si->lfb_height * 4;
 
 	fb_base = port->mapbase;
 	xres = si->lfb_width;
@@ -232,7 +247,6 @@ static int __init simplefb_earlycon_setup(struct earlycon_device *device,
 	simplefb_y = rounddown(yres, font->height) - font->height;
 	for (i = 0; i < (yres - simplefb_y) / font->height; i++)
 		simplefb_earlycon_scroll_up();
-
 	device->con->write = simplefb_earlycon_write;
 	earlycon_console = device->con;
 	return 0;

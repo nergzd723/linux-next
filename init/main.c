@@ -1039,6 +1039,8 @@ asmlinkage __visible void __init __no_sanitize_address start_kernel(void)
 	timekeeping_init();
 	kfence_init();
 
+
+
 	/*
 	 * For best initial stack canary entropy, prepare it after:
 	 * - setup_arch() for any UEFI RNG entropy and boot cmdline access

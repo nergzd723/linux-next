@@ -725,7 +725,8 @@ static int aic_irq_domain_translate(struct irq_domain *id,
 				break;
 			case AIC_TMR_HV_PHYS:
 			case AIC_TMR_HV_VIRT:
-				return -ENOENT;
+				if (aic_irqc->info.el2_regs)
+					return -ENOENT;
 			default:
 				break;
 			}
