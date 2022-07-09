@@ -184,6 +184,7 @@ properties:
       - qcom,kryo685
       - qcom,kryo780
       - qcom,scorpion
+      - samsung,meerkat
 
   enable-method:
     $ref: '/schemas/types.yaml#/definitions/string'
