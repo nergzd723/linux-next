@@ -257,7 +257,7 @@ int __init of_setup_earlycon(const struct earlycon_id *match,
 	port->iotype = UPIO_MEM;
 	addr = of_flat_dt_translate_address(node);
 	if (addr == OF_BAD_ADDR) {
-		pr_warn("[%s] bad address\n", match->name);
+		pr_err("[%s] bad address\n", match->name);
 		return -ENXIO;
 	}
 	port->mapbase = addr;
@@ -304,6 +304,9 @@ int __init of_setup_earlycon(const struct earlycon_id *match,
 		strlcpy(early_console_dev.options, options,
 			sizeof(early_console_dev.options));
 	}
+
+	early_console_dev.node = node;
+
 	earlycon_init(&early_console_dev, match->name);
 	err = match->setup(&early_console_dev, options);
 	earlycon_print_info(&early_console_dev);
