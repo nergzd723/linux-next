@@ -81,6 +81,22 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
+			usb-hub@8 {
+				compatible = "smsc,usb3503a";
+				reg = <0x08>;
+
+				reset-gpios = <&gpe1 0 GPIO_ACTIVE_LOW>;
+				disabled-ports = <3>;
+				initial-mode = <1>;
+
+				clock-names = "refclk";
+				clocks = <&pmu_system_controller 0>;
+				refclk-frequency = <24000000>;
+
+				pinctrl-names = "default";
+				pinctrl-0 = <&usb_hub_reset>;
+			};
+
 			battery: sbs-battery@b {
 				compatible = "sbs,sbs-battery";
 				reg = <0xb>;
@@ -700,6 +716,13 @@
 
 	arb_our_claim: arb-our-claim-pins {
 		samsung,pins = "gpf0-3";
+		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
+		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
+		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
+	};
+
+	usb_hub_reset: usb-hub-reset-pins {
+		samsung,pins = "gpe1-0";
 		samsung,pin-function = <EXYNOS_PIN_FUNC_OUTPUT>;
 		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
 		samsung,pin-drv = <EXYNOS4_PIN_DRV_LV1>;
