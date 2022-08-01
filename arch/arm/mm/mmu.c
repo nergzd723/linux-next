@@ -14,6 +14,7 @@
 #include <linux/fs.h>
 #include <linux/vmalloc.h>
 #include <linux/sizes.h>
+#include <linux/console.h>
 
 #include <asm/cp15.h>
 #include <asm/cputype.h>
@@ -1730,6 +1731,9 @@ static void __init early_fixmap_shutdown(void)
 	pmd_clear(fixmap_pmd(va));
 	local_flush_tlb_kernel_page(va);
 
+#ifdef CONFIG_FIX_EARLYCON_MEM
+	console_stop(console_drivers);
+#endif
 	for (i = 0; i < __end_of_permanent_fixed_addresses; i++) {
 		pte_t *pte;
 		struct map_desc map;
@@ -1748,6 +1752,9 @@ static void __init early_fixmap_shutdown(void)
 
 		create_mapping(&map);
 	}
+#ifdef CONFIG_FIX_EARLYCON_MEM
+	console_start(console_drivers);
+#endif
 }
 
 /*
