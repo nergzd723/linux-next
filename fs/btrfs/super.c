@@ -2666,7 +2666,7 @@ static int __init init_btrfs_fs(void)
 	if (err)
 		goto free_cachep;
 
-	err = extent_state_cache_init();
+	err = volumes_init();
 	if (err)
 		goto free_extent_io;
 
@@ -2725,7 +2725,7 @@ free_ordered_data:
 free_extent_map:
 	extent_map_exit();
 free_extent_state_cache:
-	extent_state_cache_exit();
+	volumes_exit();
 free_extent_io:
 	extent_io_exit();
 free_cachep:
@@ -2746,7 +2746,7 @@ static void __exit exit_btrfs_fs(void)
 	btrfs_prelim_ref_exit();
 	ordered_data_exit();
 	extent_map_exit();
-	extent_state_cache_exit();
+	volumes_exit();
 	extent_io_exit();
 	btrfs_interface_exit();
 	unregister_filesystem(&btrfs_fs_type);
