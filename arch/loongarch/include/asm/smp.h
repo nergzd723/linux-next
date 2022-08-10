@@ -12,6 +12,8 @@
 #include <linux/threads.h>
 #include <linux/cpumask.h>
 
+#ifdef CONFIG_SMP
+
 extern int smp_num_siblings;
 extern int num_processors;
 extern int disabled_cpus;
@@ -110,6 +112,12 @@ static inline void __cpu_die(unsigned int cpu)
 }
 
 extern void play_dead(void);
+#endif
+
+#else /* !CONFIG_SMP */
+
+#define cpu_logical_map(cpu)  0
+
 #endif
 
 #endif /* __ASM_SMP_H */

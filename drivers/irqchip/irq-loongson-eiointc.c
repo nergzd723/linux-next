@@ -18,6 +18,8 @@
 #include <linux/of_irq.h>
 #include <linux/of_platform.h>
 
+#include <asm/smp.h>
+
 #define EIOINTC_REG_NODEMAP	0x14a0
 #define EIOINTC_REG_IPMAP	0x14c0
 #define EIOINTC_REG_ENABLE	0x1600
@@ -95,6 +97,9 @@ static int eiointc_set_irq_affinity(struct irq_data *d, const struct cpumask *af
 	uint32_t vector, regaddr;
 	struct cpumask intersect_affinity;
 	struct eiointc_priv *priv = d->domain->host_data;
+
+	if (!IS_ENABLED(CONFIG_SMP))
+		return -EPERM;
 
 	raw_spin_lock_irqsave(&affinity_lock, flags);
 
