@@ -825,7 +825,7 @@ static void qpti_map_queues(struct qlogicpti *qpti)
 	if (qpti->res_cpu == NULL ||
 	    qpti->res_dvma == 0) {
 		printk("QPTI: Cannot map response queue.\n");
-		return -1;
+		return;
 	}
 
 	qpti->req_cpu = dma_alloc_coherent(&op->dev,
@@ -836,7 +836,7 @@ static void qpti_map_queues(struct qlogicpti *qpti)
 		dma_free_coherent(&op->dev, QSIZE(RES_QUEUE_LEN),
 				  qpti->res_cpu, qpti->res_dvma);
 		printk("QPTI: Cannot map request queue.\n");
-		return -1;
+		return;
 	}
 	memset(qpti->res_cpu, 0, QSIZE(RES_QUEUE_LEN));
 	memset(qpti->req_cpu, 0, QSIZE(QLOGICPTI_REQ_QUEUE_LEN));
@@ -1391,7 +1391,6 @@ fail_unmap_queues:
 			  qpti->req_cpu, qpti->req_dvma);
 #undef QSIZE
 
-fail_free_irq:
 	free_irq(qpti->irq, qpti);
 
 fail_unmap_regs:
