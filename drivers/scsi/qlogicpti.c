@@ -814,7 +814,7 @@ static void qpti_get_clock(struct qlogicpti *qpti)
 /* The request and response queues must each be aligned
  * on a page boundary.
  */
-static int qpti_map_queues(struct qlogicpti *qpti)
+static void qpti_map_queues(struct qlogicpti *qpti)
 {
 	struct platform_device *op = qpti->op;
 
@@ -840,7 +840,6 @@ static int qpti_map_queues(struct qlogicpti *qpti)
 	}
 	memset(qpti->res_cpu, 0, QSIZE(RES_QUEUE_LEN));
 	memset(qpti->req_cpu, 0, QSIZE(QLOGICPTI_REQ_QUEUE_LEN));
-	return 0;
 }
 
 const char *qlogicpti_info(struct Scsi_Host *host)
@@ -1339,8 +1338,7 @@ static int qpti_sbus_probe(struct platform_device *op)
 	/* Clear out scsi_cmnd array. */
 	memset(qpti->cmd_slots, 0, sizeof(qpti->cmd_slots));
 
-	if (qpti_map_queues(qpti) < 0)
-		goto fail_free_irq;
+	qpti_map_queues(qpti);
 
 	/* Load the firmware. */
 	if (qlogicpti_load_firmware(qpti))
