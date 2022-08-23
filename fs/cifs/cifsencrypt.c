@@ -680,6 +680,11 @@ setup_ntlmv2_rsp(struct cifs_ses *ses, const struct nls_table *nls_cp)
 unlock:
 	cifs_server_unlock(ses->server);
 setup_ntlmv2_rsp_ret:
+	if (rc && ses->domainName) {
+		kfree(ses->domainName);
+		ses->domainName = NULL;
+	}
+
 	kfree(tiblob);
 
 	return rc;

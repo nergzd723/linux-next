@@ -2215,7 +2215,7 @@ cifs_get_smb_ses(struct TCP_Server_Info *server, struct smb3_fs_context *ctx)
 	cifs_dbg(FYI, "Existing smb sess not found\n");
 	ses = sesInfoAlloc();
 	if (ses == NULL)
-		goto get_ses_fail;
+		goto out;
 
 	/* new SMB session uses our server ref */
 	ses->server = server;
@@ -2227,19 +2227,19 @@ cifs_get_smb_ses(struct TCP_Server_Info *server, struct smb3_fs_context *ctx)
 	if (ctx->username) {
 		ses->user_name = kstrdup(ctx->username, GFP_KERNEL);
 		if (!ses->user_name)
-			goto get_ses_fail;
+			goto out_free_ses;
 	}
 
 	/* ctx->password freed at unmount */
 	if (ctx->password) {
 		ses->password = kstrdup(ctx->password, GFP_KERNEL);
 		if (!ses->password)
-			goto get_ses_fail;
+			goto out_free_username;
 	}
 	if (ctx->domainname) {
 		ses->domainName = kstrdup(ctx->domainname, GFP_KERNEL);
 		if (!ses->domainName)
-			goto get_ses_fail;
+			goto out_free_pw;
 	}
 
 	strscpy(ses->workstation_name, ctx->workstation_name, sizeof(ses->workstation_name));
@@ -2273,7 +2273,7 @@ cifs_get_smb_ses(struct TCP_Server_Info *server, struct smb3_fs_context *ctx)
 	spin_unlock(&ses->chan_lock);
 
 	if (rc)
-		goto get_ses_fail;
+		goto out_free_domain;
 
 	/*
 	 * success, put it on the list and add it as first channel
@@ -2290,8 +2290,18 @@ cifs_get_smb_ses(struct TCP_Server_Info *server, struct smb3_fs_context *ctx)
 
 	return ses;
 
-get_ses_fail:
+out_free_domain:
+	kfree(ses->domainName);
+	ses->domainName = NULL;
+out_free_pw:
+	kfree(ses->password);
+	ses->password = NULL;
+out_free_username:
+	kfree(ses->user_name);
+	ses->user_name = NULL;
+out_free_ses:
 	sesInfoFree(ses);
+out:
 	free_xid(xid);
 	return ERR_PTR(rc);
 }
