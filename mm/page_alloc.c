@@ -4331,7 +4331,7 @@ static void warn_alloc_show_mem(gfp_t gfp_mask, nodemask_t *nodemask)
 	if (!in_task() || !(gfp_mask & __GFP_DIRECT_RECLAIM))
 		filter &= ~SHOW_MEM_FILTER_NODES;
 
-	show_mem(filter, nodemask, gfp_mask);
+	show_mem(filter, nodemask);
 }
 
 void warn_alloc(gfp_t gfp_mask, nodemask_t *nodemask, const char *fmt, ...)
@@ -6051,15 +6051,6 @@ static void show_migration_types(unsigned char type)
 	printk(KERN_CONT "(%s) ", tmp);
 }
 
-static bool node_has_managed_zones(pg_data_t *pgdat, int max_zone_idx)
-{
-	int zone_idx;
-	for (zone_idx = 0; zone_idx <= max_zone_idx; zone_idx++)
-		if (zone_managed_pages(pgdat->node_zones + zone_idx))
-			return true;
-	return false;
-}
-
 /*
  * Show free area list (used inside shift_scroll-lock stuff)
  * We also calculate the percentage fragmentation. We do this by counting the
@@ -6069,17 +6060,14 @@ static bool node_has_managed_zones(pg_data_t *pgdat, int max_zone_idx)
  * SHOW_MEM_FILTER_NODES: suppress nodes that are not allowed by current's
  *   cpuset.
  */
-void show_free_areas(unsigned int filter, nodemask_t *nodemask, gfp_t gfp_mask)
+void show_free_areas(unsigned int filter, nodemask_t *nodemask)
 {
 	unsigned long free_pcp = 0;
-	int max_zone_idx = gfp_zone(gfp_mask);
 	int cpu, nid;
 	struct zone *zone;
 	pg_data_t *pgdat;
 
 	for_each_populated_zone(zone) {
-		if (zone_idx(zone) > max_zone_idx)
-			continue;
 		if (show_mem_node_skip(filter, zone_to_nid(zone), nodemask))
 			continue;
 
@@ -6116,8 +6104,6 @@ void show_free_areas(unsigned int filter, nodemask_t *nodemask, gfp_t gfp_mask)
 
 	for_each_online_pgdat(pgdat) {
 		if (show_mem_node_skip(filter, pgdat->node_id, nodemask))
-			continue;
-		if (!node_has_managed_zones(pgdat, max_zone_idx))
 			continue;
 
 		printk("Node %d"
@@ -6175,8 +6161,6 @@ void show_free_areas(unsigned int filter, nodemask_t *nodemask, gfp_t gfp_mask)
 	for_each_populated_zone(zone) {
 		int i;
 
-		if (zone_idx(zone) > max_zone_idx)
-			continue;
 		if (show_mem_node_skip(filter, zone_to_nid(zone), nodemask))
 			continue;
 
@@ -6238,8 +6222,6 @@ void show_free_areas(unsigned int filter, nodemask_t *nodemask, gfp_t gfp_mask)
 		unsigned long nr[MAX_ORDER], flags, total = 0;
 		unsigned char types[MAX_ORDER];
 
-		if (zone_idx(zone) > max_zone_idx)
-			continue;
 		if (show_mem_node_skip(filter, zone_to_nid(zone), nodemask))
 			continue;
 		show_node(zone);
