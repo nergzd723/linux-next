@@ -87,10 +87,29 @@ struct bpf_cgroup_storage_key {
 	__u32	attach_type;		/* program attach type (enum bpf_attach_type) */
 };
 
+enum bpf_cgroup_iter_order {
+	BPF_CGROUP_ITER_ORDER_UNSPEC = 0,
+	BPF_CGROUP_ITER_SELF_ONLY,		/* process only a single object. */
+	BPF_CGROUP_ITER_DESCENDANTS_PRE,	/* walk descendants in pre-order. */
+	BPF_CGROUP_ITER_DESCENDANTS_POST,	/* walk descendants in post-order. */
+	BPF_CGROUP_ITER_ANCESTORS_UP,		/* walk ancestors upward. */
+};
+
 union bpf_iter_link_info {
 	struct {
 		__u32	map_fd;
 	} map;
+	struct {
+		enum bpf_cgroup_iter_order order;
+
+		/* At most one of cgroup_fd and cgroup_id can be non-zero. If
+		 * both are zero, the walk starts from the default cgroup v2
+		 * root. For walking v1 hierarchy, one should always explicitly
+		 * specify cgroup_fd.
+		 */
+		__u32	cgroup_fd;
+		__u64	cgroup_id;
+	} cgroup;
 };
 
 /* BPF syscall commands, see bpf(2) man-page for more details. */
@@ -5085,17 +5104,29 @@ union bpf_attr {
  *
  * int bpf_get_retval(void)
  *	Description
- *		Get the syscall's return value that will be returned to userspace.
+ *		Get the BPF program's return value that will be returned to the upper layers.
  *
- *		This helper is currently supported by cgroup programs only.
+ *		This helper is currently supported by cgroup programs and only by the hooks
+ *		where BPF program's return value is returned to the userspace via errno.
  *	Return
- *		The syscall's return value.
+ *		The BPF program's return value.
  *
  * int bpf_set_retval(int retval)
  *	Description
- *		Set the syscall's return value that will be returned to userspace.
+ *		Set the BPF program's return value that will be returned to the upper layers.
  *
- *		This helper is currently supported by cgroup programs only.
+ *		This helper is currently supported by cgroup programs and only by the hooks
+ *		where BPF program's return value is returned to the userspace via errno.
+ *
+ *		Note that there is the following corner case where the program exports an error
+ *		via bpf_set_retval but signals success via 'return 1':
+ *
+ *			bpf_set_retval(-EPERM);
+ *			return 1;
+ *
+ *		In this case, the BPF program's return value will use helper's -EPERM. This
+ *		still holds true for cgroup/bind{4,6} which supports extra 'return 3' success case.
+ *
  *	Return
  *		0 on success, or a negative error in case of failure.
  *
@@ -5861,6 +5892,11 @@ enum bpf_ret_code {
 	 *    represented by BPF_REDIRECT above).
 	 */
 	BPF_LWT_REROUTE = 128,
+	/* BPF_FLOW_DISSECTOR_CONTINUE: used by BPF_PROG_TYPE_FLOW_DISSECTOR
+	 *   to indicate that no custom dissection was performed, and
+	 *   fallback to standard dissector is requested.
+	 */
+	BPF_FLOW_DISSECTOR_CONTINUE = 129,
 };
 
 struct bpf_sock {
@@ -6159,10 +6195,21 @@ struct bpf_link_info {
 		struct {
 			__aligned_u64 target_name; /* in/out: target_name buffer ptr */
 			__u32 target_name_len;	   /* in/out: target_name buffer len */
+
+			/* If the iter specific field is 32 bits, it can be put
+			 * in the first or second union. Otherwise it should be
+			 * put in the second union.
+			 */
 			union {
 				struct {
 					__u32 map_id;
 				} map;
+			};
+			union {
+				struct {
+					__u64 cgroup_id;
+					__u32 order;
+				} cgroup;
 			};
 		} iter;
 		struct  {
