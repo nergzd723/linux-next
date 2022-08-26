@@ -304,8 +304,10 @@ static void acpi_init_of_compatible(struct acpi_device *adev)
 		ret = acpi_dev_get_property(adev, "compatible",
 					    ACPI_TYPE_STRING, &of_compatible);
 		if (ret) {
-			if (adev->parent
-			    && adev->parent->flags.of_compatible_ok)
+			struct acpi_device *parent;
+
+			parent = acpi_dev_parent(adev);
+			if (parent && parent->flags.of_compatible_ok)
 				goto out;
 
 			return;
@@ -370,7 +372,7 @@ static bool acpi_tie_nondev_subnodes(struct acpi_device_data *data)
 		bool ret;
 
 		status = acpi_attach_data(dn->handle, acpi_nondev_subnode_tag, dn);
-		if (ACPI_FAILURE(status)) {
+		if (ACPI_FAILURE(status) && status != AE_ALREADY_EXISTS) {
 			acpi_handle_err(dn->handle, "Can't tag data node\n");
 			return false;
 		}
@@ -1043,11 +1045,10 @@ static int acpi_data_prop_read_single(const struct acpi_device_data *data,
 				break;					\
 			}						\
 			if (__items[i].integer.value > _Generic(__val,	\
-								u8: U8_MAX, \
-								u16: U16_MAX, \
-								u32: U32_MAX, \
-								u64: U64_MAX, \
-								default: 0U)) { \
+								u8 *: U8_MAX, \
+								u16 *: U16_MAX, \
+								u32 *: U32_MAX, \
+								u64 *: U64_MAX)) { \
 				ret = -EOVERFLOW;			\
 				break;					\
 			}						\
