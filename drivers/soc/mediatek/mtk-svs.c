@@ -262,7 +262,6 @@ static const u32 svs_regs_v2[] = {
  * @rst: svs platform reset control
  * @efuse_parsing: svs platform efuse parsing function pointer
  * @probe: svs platform probe function pointer
- * @irqflags: svs platform irq settings flags
  * @efuse_max: total number of svs efuse
  * @tefuse_max: total number of thermal efuse
  * @regs: svs platform registers map
@@ -280,7 +279,6 @@ struct svs_platform {
 	struct reset_control *rst;
 	bool (*efuse_parsing)(struct svs_platform *svsp);
 	int (*probe)(struct svs_platform *svsp);
-	unsigned long irqflags;
 	size_t efuse_max;
 	size_t tefuse_max;
 	const u32 *regs;
@@ -294,7 +292,6 @@ struct svs_platform_data {
 	struct svs_bank *banks;
 	bool (*efuse_parsing)(struct svs_platform *svsp);
 	int (*probe)(struct svs_platform *svsp);
-	unsigned long irqflags;
 	const u32 *regs;
 	u32 bank_max;
 };
@@ -1589,7 +1586,7 @@ static int svs_bank_resource_setup(struct svs_platform *svsp)
 
 		dev_set_drvdata(svsb->dev, svsp);
 
-		ret = dev_pm_opp_of_add_table(svsb->opp_dev);
+		ret = devm_pm_opp_of_add_table(svsb->opp_dev);
 		if (ret) {
 			dev_err(svsb->dev, "add opp table fail: %d\n", ret);
 			return ret;
@@ -2244,7 +2241,6 @@ static const struct svs_platform_data svs_mt8192_platform_data = {
 	.banks = svs_mt8192_banks,
 	.efuse_parsing = svs_mt8192_efuse_parsing,
 	.probe = svs_mt8192_platform_probe,
-	.irqflags = IRQF_TRIGGER_HIGH,
 	.regs = svs_regs_v2,
 	.bank_max = ARRAY_SIZE(svs_mt8192_banks),
 };
@@ -2254,7 +2250,6 @@ static const struct svs_platform_data svs_mt8183_platform_data = {
 	.banks = svs_mt8183_banks,
 	.efuse_parsing = svs_mt8183_efuse_parsing,
 	.probe = svs_mt8183_platform_probe,
-	.irqflags = IRQF_TRIGGER_LOW,
 	.regs = svs_regs_v2,
 	.bank_max = ARRAY_SIZE(svs_mt8183_banks),
 };
@@ -2292,7 +2287,6 @@ static struct svs_platform *svs_platform_probe(struct platform_device *pdev)
 	svsp->banks = svsp_data->banks;
 	svsp->efuse_parsing = svsp_data->efuse_parsing;
 	svsp->probe = svsp_data->probe;
-	svsp->irqflags = svsp_data->irqflags;
 	svsp->regs = svsp_data->regs;
 	svsp->bank_max = svsp_data->bank_max;
 
@@ -2306,8 +2300,7 @@ static struct svs_platform *svs_platform_probe(struct platform_device *pdev)
 static int svs_probe(struct platform_device *pdev)
 {
 	struct svs_platform *svsp;
-	unsigned int svsp_irq;
-	int ret;
+	int svsp_irq, ret;
 
 	svsp = svs_platform_probe(pdev);
 	if (IS_ERR(svsp))
@@ -2325,10 +2318,14 @@ static int svs_probe(struct platform_device *pdev)
 		goto svs_probe_free_resource;
 	}
 
-	svsp_irq = irq_of_parse_and_map(svsp->dev->of_node, 0);
+	svsp_irq = platform_get_irq(pdev, 0);
+	if (svsp_irq < 0) {
+		ret = svsp_irq;
+		goto svs_probe_free_resource;
+	}
+
 	ret = devm_request_threaded_irq(svsp->dev, svsp_irq, NULL, svs_isr,
-					svsp->irqflags | IRQF_ONESHOT,
-					svsp->name, svsp);
+					IRQF_ONESHOT, svsp->name, svsp);
 	if (ret) {
 		dev_err(svsp->dev, "register irq(%d) failed: %d\n",
 			svsp_irq, ret);
@@ -2392,7 +2389,7 @@ static struct platform_driver svs_driver = {
 	.driver	= {
 		.name		= "mtk-svs",
 		.pm		= &svs_pm_ops,
-		.of_match_table	= of_match_ptr(svs_of_match),
+		.of_match_table	= svs_of_match,
 	},
 };
 
