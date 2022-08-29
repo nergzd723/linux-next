@@ -63,7 +63,7 @@ static void panic_show_mem(const char *fmt, ...)
 {
 	va_list args;
 
-	show_mem(0, NULL);
+	show_mem(0, NULL, GFP_HIGHUSER_MOVABLE);
 	va_start(args, fmt);
 	panic(fmt, args);
 	va_end(args);
@@ -482,7 +482,7 @@ static long __init flush_buffer(void *bufv, unsigned long len)
 	return origLen;
 }
 
-static unsigned long my_inptr; /* index of next byte to be processed in inbuf */
+static unsigned long my_inptr __initdata; /* index of next byte to be processed in inbuf */
 
 #include <linux/decompress/generic.h>
 
