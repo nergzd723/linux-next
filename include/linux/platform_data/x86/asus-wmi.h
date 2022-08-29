@@ -65,6 +65,7 @@
 #define ASUS_WMI_DEVID_PANEL_OD		0x00050019
 #define ASUS_WMI_DEVID_CAMERA		0x00060013
 #define ASUS_WMI_DEVID_LID_FLIP		0x00060062
+#define ASUS_WMI_DEVID_LID_FLIP_ROG	0x00060077
 
 /* Storage */
 #define ASUS_WMI_DEVID_CARDREADER	0x00080013
@@ -98,6 +99,9 @@
 
 /* dgpu on/off */
 #define ASUS_WMI_DEVID_DGPU		0x00090020
+
+/* gpu mux switch, 0 = dGPU, 1 = Optimus */
+#define ASUS_WMI_DEVID_GPU_MUX		0x00090016
 
 /* DSTS masks */
 #define ASUS_WMI_DSTS_STATUS_BIT	0x00000001
