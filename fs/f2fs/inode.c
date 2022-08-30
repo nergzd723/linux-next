@@ -490,10 +490,7 @@ struct inode *f2fs_iget(struct super_block *sb, unsigned long ino)
 	if (!inode)
 		return ERR_PTR(-ENOMEM);
 
-	if (!(inode->i_state & I_NEW)) {
-		trace_f2fs_iget(inode);
-		return inode;
-	}
+	/* We can see an old cached inode. Let's set the aops all the time. */
 	if (ino == F2FS_NODE_INO(sbi) || ino == F2FS_META_INO(sbi))
 		goto make_now;
 
@@ -501,6 +498,11 @@ struct inode *f2fs_iget(struct super_block *sb, unsigned long ino)
 	if (ino == F2FS_COMPRESS_INO(sbi))
 		goto make_now;
 #endif
+
+	if (!(inode->i_state & I_NEW)) {
+		trace_f2fs_iget(inode);
+		return inode;
+	}
 
 	ret = do_read_inode(inode);
 	if (ret)
@@ -557,7 +559,8 @@ make_now:
 		file_dont_truncate(inode);
 	}
 
-	unlock_new_inode(inode);
+	if (inode->i_state & I_NEW)
+		unlock_new_inode(inode);
 	trace_f2fs_iget(inode);
 	return inode;
 
