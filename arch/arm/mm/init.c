@@ -180,11 +180,27 @@ void check_cpu_icache_size(int cpuid)
 }
 #endif
 
+static void sanitize_initrd_address(void)
+{
+	/*
+	 * If initrd is not on valid physical address, reason could
+	 * be due to bootloader passing address from bootalias region.
+	 * Try to sanitize such address for platforms supporting boot
+	 * aliases.
+	 */
+	if (!pfn_valid(__phys_to_pfn(phys_initrd_start))) {
+		pr_info("initrd at invalid address, trying to use boot alias\n");
+		if (arm_has_idmap_alias())
+			phys_initrd_start = idmap_to_phys(phys_initrd_start);
+	}
+}
+
 void __init arm_memblock_init(const struct machine_desc *mdesc)
 {
 	/* Register the kernel text, kernel data and initrd with memblock. */
 	memblock_reserve(__pa(KERNEL_START), KERNEL_END - KERNEL_START);
 
+	sanitize_initrd_address();
 	reserve_initrd_mem();
 
 	arm_mm_memblock_reserve();
