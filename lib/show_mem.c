@@ -8,7 +8,7 @@
 #include <linux/mm.h>
 #include <linux/cma.h>
 
-void show_mem(unsigned int filter, nodemask_t *nodemask)
+void __show_mem(unsigned int filter, nodemask_t *nodemask)
 {
 	pg_data_t *pgdat;
 	unsigned long total = 0, reserved = 0, highmem = 0;
