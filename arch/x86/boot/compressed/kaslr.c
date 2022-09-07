@@ -29,7 +29,6 @@
 #include <linux/uts.h>
 #include <linux/utsname.h>
 #include <linux/ctype.h>
-#include <generated/utsversion.h>
 #include <generated/utsrelease.h>
 
 #define _SETUP
