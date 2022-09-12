@@ -5272,7 +5272,6 @@ static struct cftype cgroup_psi_files[] = {
 #ifdef CONFIG_IRQ_TIME_ACCOUNTING
 	{
 		.name = "irq.pressure",
-		.flags = CFTYPE_PRESSURE,
 		.file_offset = offsetof(struct cgroup, psi_files[PSI_IRQ]),
 		.seq_show = cgroup_irq_pressure_show,
 		.write = cgroup_irq_pressure_write,
@@ -5282,7 +5281,6 @@ static struct cftype cgroup_psi_files[] = {
 #endif
 	{
 		.name = "cgroup.pressure",
-		.flags = CFTYPE_PRESSURE,
 		.seq_show = cgroup_pressure_show,
 		.write = cgroup_pressure_write,
 	},
