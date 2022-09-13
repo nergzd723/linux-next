@@ -207,7 +207,7 @@ smb2_compound_op(const unsigned int xid, struct cifs_tcon *tcon,
 		rqst[num_rqst].rq_iov = &vars->si_iov[0];
 		rqst[num_rqst].rq_nvec = 1;
 
-		size[0] = 1; /* sizeof __u8 See MS-FSCC section 2.4.11 */
+		size[0] = sizeof(u8); /* See MS-FSCC section 2.4.11 */
 		data[0] = &delete_pending[0];
 
 		rc = SMB2_set_info_init(tcon, server,
@@ -225,7 +225,7 @@ smb2_compound_op(const unsigned int xid, struct cifs_tcon *tcon,
 		rqst[num_rqst].rq_iov = &vars->si_iov[0];
 		rqst[num_rqst].rq_nvec = 1;
 
-		size[0] = 8; /* sizeof __le64 */
+		size[0] = sizeof(__le64);
 		data[0] = ptr;
 
 		rc = SMB2_set_info_init(tcon, server,
