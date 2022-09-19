@@ -40,6 +40,17 @@ static size_t sof_ipc4_fw_parse_ext_man(struct snd_sof_dev *sdev)
 
 	ext_man_hdr = (struct sof_ext_manifest4_hdr *)fw->data;
 
+	/*
+	 * At the start of the firmware image we must have an extended manifest.
+	 * Verify that the magic number is correct.
+	 */
+	if (ext_man_hdr->id != SOF_EXT_MAN4_MAGIC_NUMBER) {
+		dev_err(sdev->dev,
+			"Unexpected extended manifest magic number: %#x\n",
+			ext_man_hdr->id);
+		return -EINVAL;
+	}
+
 	fw_hdr_offset = ipc4_data->manifest_fw_hdr_offset;
 	if (!fw_hdr_offset)
 		return -EINVAL;
@@ -146,6 +157,7 @@ static int sof_ipc4_validate_firmware(struct snd_sof_dev *sdev)
 
 static int sof_ipc4_query_fw_configuration(struct snd_sof_dev *sdev)
 {
+	struct sof_ipc4_fw_data *ipc4_data = sdev->private;
 	const struct sof_ipc_ops *iops = sdev->ipc->ops;
 	struct sof_ipc4_fw_version *fw_ver;
 	struct sof_ipc4_tuple *tuple;
@@ -189,6 +201,7 @@ static int sof_ipc4_query_fw_configuration(struct snd_sof_dev *sdev)
 			break;
 		case SOF_IPC4_FW_CFG_TRACE_LOG_BYTES:
 			dev_vdbg(sdev->dev, "Trace log size: %u\n", *tuple->value);
+			ipc4_data->mtrace_log_bytes = *tuple->value;
 			break;
 		default:
 			break;
