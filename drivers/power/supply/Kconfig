@@ -918,4 +918,20 @@ config BATTERY_UG3105
 	  device is off or suspended, the functionality of this driver is
 	  limited to reporting capacity only.
 
+config CHARGER_QCOM_SMB2
+	tristate "Qualcomm PMI8998 PMIC charger driver"
+	depends on MFD_SPMI_PMIC
+	depends on IIO
+	select QCOM_SPMI_RRADC
+	help
+	  Driver for the "SMB2" charger block found on Qualcomm PMI8998
+	  and PM660 PMICs.
+
+	  The charger features automatic power source detection via BC1.2,
+	  automatic input current limiting and reports the realtime voltage
+	  and current via the Round Robin ADC.
+
+	  Say Y or M here to enable reporting the charger status and rate on
+	  supported platforms such as Snapdragon 845 and 835 based phones.
+
 endif # POWER_SUPPLY
