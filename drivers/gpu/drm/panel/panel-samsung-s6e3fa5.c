@@ -196,16 +196,28 @@ static int s6e3fa5_get_modes(struct drm_panel *panel,
 	mode->type = DRM_MODE_TYPE_DRIVER | DRM_MODE_TYPE_PREFERRED;
 	connector->display_info.width_mm = mode->width_mm;
 	connector->display_info.height_mm = mode->height_mm;
+	/*
+	 * TODO: Remove once all drm drivers call
+	 * drm_connector_set_orientation_from_panel()
+	 */
 	drm_connector_set_panel_orientation(connector, ctx->orientation);
 	drm_mode_probed_add(connector, mode);
 
 	return 1;
 }
 
+static enum drm_panel_orientation s6e3fa5_get_orientation(struct drm_panel *panel)
+{
+	struct s6e3fa5 *ctx = to_s6e3fa5_panel(panel);
+
+	return ctx->orientation;
+}
+
 static const struct drm_panel_funcs s6e3fa5_panel_funcs = {
 	.prepare = s6e3fa5_prepare,
 	.unprepare = s6e3fa5_unprepare,
 	.get_modes = s6e3fa5_get_modes,
+	.get_orientation = s6e3fa5_get_orientation,
 };
 
 static int s6e3fa5_bl_update_status(struct backlight_device *bl)
