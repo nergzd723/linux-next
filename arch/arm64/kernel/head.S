@@ -102,6 +102,7 @@ SYM_CODE_START(primary_entry)
 	 * the TCR will have been set.
 	 */
 	bl	__cpu_setup			// initialise processor
+
 	b	__primary_switch
 SYM_CODE_END(primary_entry)
 
@@ -463,7 +464,7 @@ SYM_FUNC_START_LOCAL(__primary_switched)
 	ret					// to __primary_switch()
 0:
 #endif
-	bl	switch_to_vhe			// Prefer VHE if possible
+//	bl	switch_to_vhe			// Prefer VHE if possible
 	ldp	x29, x30, [sp], #16
 	bl	start_kernel
 	ASM_BUG()
@@ -510,6 +511,7 @@ SYM_INNER_LABEL(init_el1, SYM_L_LOCAL)
 
 SYM_INNER_LABEL(init_el2, SYM_L_LOCAL)
 	mov_q	x0, HCR_HOST_NVHE_FLAGS
+	orr x0, x0, (1<<28)
 	msr	hcr_el2, x0
 	isb
 

@@ -51,16 +51,16 @@ static int exynos5433_pcie_phy_init(struct phy *phy)
 {
 	struct exynos_pcie_phy *ep = phy_get_drvdata(phy);
 
-	regmap_update_bits(ep->fsysreg,	PCIE_EXYNOS5433_PHY_COMMON_RESET,
-			   PCIE_PHY_RESET, 1);
-	regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_MAC_RESET,
-			   PCIE_MAC_RESET, 0);
+	// regmap_update_bits(ep->fsysreg,	PCIE_EXYNOS5433_PHY_COMMON_RESET,
+	// 		   PCIE_PHY_RESET, 1);
+	// regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_MAC_RESET,
+	// 		   PCIE_MAC_RESET, 0);
 
-	/* PHY refclk 24MHz */
-	regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_GLOBAL_RESET,
-			   PCIE_REFCLK_MASK, PCIE_REFCLK);
-	regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_GLOBAL_RESET,
-			   PCIE_GLOBAL_RESET, 0);
+	// /* PHY refclk 24MHz */
+	// regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_GLOBAL_RESET,
+	// 		   PCIE_REFCLK_MASK, PCIE_REFCLK);
+	// regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_GLOBAL_RESET,
+	// 		   PCIE_GLOBAL_RESET, 0);
 
 
 	exynos_pcie_phy_writel(ep->base, 0x11, PCIE_PHY_OFFSET(0x3));
@@ -102,10 +102,10 @@ static int exynos5433_pcie_phy_init(struct phy *phy)
 	exynos_pcie_phy_writel(ep->base, 0x04, PCIE_PHY_OFFSET(0x31));
 	exynos_pcie_phy_writel(ep->base, 0, PCIE_PHY_OFFSET(0x32));
 
-	regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_COMMON_RESET,
-			   PCIE_PHY_RESET, 0);
-	regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_MAC_RESET,
-			   PCIE_MAC_RESET_MASK, PCIE_MAC_RESET);
+	// regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_COMMON_RESET,
+	// 		   PCIE_PHY_RESET, 0);
+	// regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_MAC_RESET,
+	// 		   PCIE_MAC_RESET_MASK, PCIE_MAC_RESET);
 	return 0;
 }
 
@@ -115,10 +115,10 @@ static int exynos5433_pcie_phy_power_on(struct phy *phy)
 
 	regmap_update_bits(ep->pmureg, EXYNOS5433_PMU_PCIE_PHY_OFFSET,
 			   BIT(0), 1);
-	regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_GLOBAL_RESET,
-			   PCIE_APP_REQ_EXIT_L1_MODE, 0);
-	regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_L1SUB_CM_CON,
-			   PCIE_REFCLK_GATING_EN, 0);
+	// regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_GLOBAL_RESET,
+	// 		   PCIE_APP_REQ_EXIT_L1_MODE, 0);
+	// regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_L1SUB_CM_CON,
+	// 		   PCIE_REFCLK_GATING_EN, 0);
 	return 0;
 }
 
@@ -126,8 +126,8 @@ static int exynos5433_pcie_phy_power_off(struct phy *phy)
 {
 	struct exynos_pcie_phy *ep = phy_get_drvdata(phy);
 
-	regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_L1SUB_CM_CON,
-			   PCIE_REFCLK_GATING_EN, PCIE_REFCLK_GATING_EN);
+	// regmap_update_bits(ep->fsysreg, PCIE_EXYNOS5433_PHY_L1SUB_CM_CON,
+	// 		   PCIE_REFCLK_GATING_EN, PCIE_REFCLK_GATING_EN);
 	regmap_update_bits(ep->pmureg, EXYNOS5433_PMU_PCIE_PHY_OFFSET,
 			   BIT(0), 0);
 	return 0;
@@ -184,7 +184,7 @@ static int exynos_pcie_phy_probe(struct platform_device *pdev)
 
 	phy_set_drvdata(generic_phy, exynos_phy);
 	phy_provider = devm_of_phy_provider_register(dev, of_phy_simple_xlate);
-
+	dev_err(&pdev->dev, "PCIe PHY Probe done!\n");
 	return PTR_ERR_OR_ZERO(phy_provider);
 }
 

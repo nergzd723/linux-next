@@ -440,12 +440,11 @@ static int exynos_ufs_get_clk_info(struct exynos_ufs *ufs)
 
 	if (!ufs->clk_hci_core || !ufs->clk_unipro_main) {
 		dev_err(hba->dev, "failed to get clk info\n");
-		ret = -EINVAL;
-		goto out;
+		ret = 0;
 	}
 
-	ufs->mclk_rate = clk_get_rate(ufs->clk_unipro_main);
-	pclk_rate = clk_get_rate(ufs->clk_hci_core);
+	ufs->mclk_rate = 166562500;
+	pclk_rate = 167000000;
 	f_min = ufs->pclk_avail_min;
 	f_max = ufs->pclk_avail_max;
 
@@ -716,6 +715,8 @@ static void exynos_ufs_establish_connt(struct exynos_ufs *ufs)
 static void exynos_ufs_config_smu(struct exynos_ufs *ufs)
 {
 	u32 reg, val;
+
+	return;
 
 	exynos_ufs_disable_auto_ctrl_hcc_save(ufs, &val);
 
@@ -1595,11 +1596,30 @@ static struct exynos_ufs_drv_data exynos_ufs_drvs = {
 	.post_pwr_change	= exynos7_ufs_post_pwr_change,
 };
 
+static struct exynos_ufs_drv_data exynos9810_ufs_drvs = {
+	.uic_attr		= &exynos7_uic_attr,
+	.quirks			= UFSHCD_QUIRK_PRDT_BYTE_GRAN |
+				  UFSHCI_QUIRK_SKIP_RESET_INTR_AGGR |
+				  UFSHCI_QUIRK_BROKEN_REQ_LIST_CLR |
+				  UFSHCD_QUIRK_BROKEN_OCS_FATAL_ERROR |
+				  UFSHCD_QUIRK_SKIP_DEF_UNIPRO_TIMEOUT_SETTING,
+	.opts			= EXYNOS_UFS_OPT_BROKEN_AUTO_CLK_CTRL |
+				  EXYNOS_UFS_OPT_SKIP_CONFIG_PHY_ATTR |
+				  EXYNOS_UFS_OPT_BROKEN_RX_SEL_IDX,
+	.drv_init		= exynosauto_ufs_drv_init,
+	.post_hce_enable	= exynosauto_ufs_post_hce_enable,
+	.pre_link		= exynosauto_ufs_pre_link,
+	.pre_pwr_change		= exynosauto_ufs_pre_pwr_change,
+	.post_pwr_change	= exynosauto_ufs_post_pwr_change,
+};
+
 static const struct of_device_id exynos_ufs_of_match[] = {
 	{ .compatible = "samsung,exynos7-ufs",
 	  .data	      = &exynos_ufs_drvs },
 	{ .compatible = "samsung,exynosautov9-ufs",
 	  .data	      = &exynosauto_ufs_drvs },
+	{ .compatible = "samsung,exynos9810-ufs",
+	  .data	      = &exynos9810_ufs_drvs },
 	{ .compatible = "samsung,exynosautov9-ufs-vh",
 	  .data	      = &exynosauto_ufs_vh_drvs },
 	{},

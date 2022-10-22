@@ -83,28 +83,35 @@ static int panfrost_ioctl_create_bo(struct drm_device *dev, void *data,
 	struct drm_panfrost_create_bo *args = data;
 	struct panfrost_gem_mapping *mapping;
 
+	dev_err(NULL, "1");
+
 	if (!args->size || args->pad ||
 	    (args->flags & ~(PANFROST_BO_NOEXEC | PANFROST_BO_HEAP)))
 		return -EINVAL;
+	dev_err(NULL, "12");
 
 	/* Heaps should never be executable */
 	if ((args->flags & PANFROST_BO_HEAP) &&
 	    !(args->flags & PANFROST_BO_NOEXEC))
 		return -EINVAL;
+	dev_err(NULL, "123");
 
 	bo = panfrost_gem_create_with_handle(file, dev, args->size, args->flags,
 					     &args->handle);
 	if (IS_ERR(bo))
 		return PTR_ERR(bo);
+	dev_err(NULL, "1234");
 
 	mapping = panfrost_gem_mapping_get(bo, priv);
 	if (!mapping) {
 		drm_gem_object_put(&bo->base.base);
 		return -EINVAL;
 	}
+	dev_err(NULL, "12345");
 
 	args->offset = mapping->mmnode.start << PAGE_SHIFT;
 	panfrost_gem_mapping_put(mapping);
+	dev_err(NULL, "123456");
 
 	return 0;
 }

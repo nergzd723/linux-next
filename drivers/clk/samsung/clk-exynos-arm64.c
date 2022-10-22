@@ -35,9 +35,10 @@ static void __init exynos_arm64_init_clocks(struct device_node *np,
 	void __iomem *reg_base;
 	size_t i;
 
-	reg_base = of_iomap(np, 0);
-	if (!reg_base)
-		panic("%s: failed to map registers\n", __func__);
+	reg_base = of_io_request_and_map(np, 0, NULL);
+
+	if (IS_ERR(reg_base))
+		panic("%s: failed to map registers: %d\n", __func__, reg_base);
 
 	for (i = 0; i < reg_offs_len; ++i) {
 		void __iomem *reg = reg_base + reg_offs[i];

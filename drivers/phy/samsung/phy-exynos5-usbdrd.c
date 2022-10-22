@@ -483,7 +483,6 @@ static int exynos5_usbdrd_phy_power_on(struct phy *phy)
 
 	dev_dbg(phy_drd->dev, "Request to power_on usbdrd_phy phy\n");
 
-	clk_prepare_enable(phy_drd->ref_clk);
 	if (!phy_drd->drv_data->has_common_clk_gate) {
 		clk_prepare_enable(phy_drd->pipeclk);
 		clk_prepare_enable(phy_drd->utmiclk);
@@ -518,7 +517,6 @@ fail_vbus_boost:
 		regulator_disable(phy_drd->vbus_boost);
 
 fail_vbus:
-	clk_disable_unprepare(phy_drd->ref_clk);
 	if (!phy_drd->drv_data->has_common_clk_gate) {
 		clk_disable_unprepare(phy_drd->itpclk);
 		clk_disable_unprepare(phy_drd->utmiclk);
@@ -544,7 +542,6 @@ static int exynos5_usbdrd_phy_power_off(struct phy *phy)
 	if (phy_drd->vbus_boost)
 		regulator_disable(phy_drd->vbus_boost);
 
-	clk_disable_unprepare(phy_drd->ref_clk);
 	if (!phy_drd->drv_data->has_common_clk_gate) {
 		clk_disable_unprepare(phy_drd->itpclk);
 		clk_disable_unprepare(phy_drd->pipeclk);
@@ -724,12 +721,7 @@ static int exynos5_usbdrd_phy_clk_handle(struct exynos5_usbdrd_phy *phy_drd)
 		return PTR_ERR(phy_drd->clk);
 	}
 
-	phy_drd->ref_clk = devm_clk_get(phy_drd->dev, "ref");
-	if (IS_ERR(phy_drd->ref_clk)) {
-		dev_err(phy_drd->dev, "Failed to get phy reference clock\n");
-		return PTR_ERR(phy_drd->ref_clk);
-	}
-	ref_rate = clk_get_rate(phy_drd->ref_clk);
+	ref_rate = 50000000;
 
 	ret = exynos5_rate_to_clk(ref_rate, &phy_drd->extrefclk);
 	if (ret) {
@@ -805,6 +797,12 @@ static const struct exynos5_usbdrd_phy_drvdata exynos7_usbdrd_phy = {
 	.has_common_clk_gate	= false,
 };
 
+static const struct exynos5_usbdrd_phy_drvdata exynos9810_usbdrd_phy = {
+	.phy_cfg		= phy_cfg_exynos5,
+	.pmu_offset_usbdrd0_phy	= 0x72c,
+	.has_common_clk_gate	= true,
+};
+
 static const struct of_device_id exynos5_usbdrd_phy_of_match[] = {
 	{
 		.compatible = "samsung,exynos5250-usbdrd-phy",
@@ -818,6 +816,9 @@ static const struct of_device_id exynos5_usbdrd_phy_of_match[] = {
 	}, {
 		.compatible = "samsung,exynos7-usbdrd-phy",
 		.data = &exynos7_usbdrd_phy
+	}, {
+		.compatible = "samsung,exynos9810-usbdrd-phy",
+		.data = &exynos9810_usbdrd_phy
 	},
 	{ },
 };

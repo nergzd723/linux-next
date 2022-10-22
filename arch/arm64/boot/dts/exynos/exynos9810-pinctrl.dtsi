@@ -199,10 +199,6 @@
 		     <GIC_SPI 27 IRQ_TYPE_LEVEL_HIGH>,
 		     <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>;
 
-	wakeup-interrupt-controller {
-		compatible = "samsung,exynos7-wakeup-eint";
-	};
-
 	gpm0: gpm0-gpio-bank {
 		gpio-controller;
 		#gpio-cells = <2>;
