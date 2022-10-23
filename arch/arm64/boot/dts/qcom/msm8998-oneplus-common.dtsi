@@ -106,7 +106,7 @@
 			gpios = <&pm8998_gpio 5 GPIO_ACTIVE_LOW>;
 			linux,code = <KEY_VOLUMEDOWN>;
 			debounce-interval = <15>;
-			wakeup-source;
+			wakeup-source; // TODO: remove?
 		};
 
 		button-vol-up {
@@ -114,7 +114,7 @@
 			gpios = <&pm8998_gpio 6 GPIO_ACTIVE_LOW>;
 			linux,code = <KEY_VOLUMEUP>;
 			debounce-interval = <15>;
-			wakeup-source;
+			wakeup-source; // TODO: remove?
 		};
 	};
 
@@ -662,6 +662,8 @@
 		/delete-node/ opp-670000048;
 		/delete-node/ opp-596000097;
 		/delete-node/ opp-515000097;
+		/delete-node/ opp-414000000;
+		/delete-node/ opp-342000000;
 	};
 };
 
