@@ -18,6 +18,7 @@ properties:
   compatible:
     items:
       - enum:
+          - apple,t8010-pinctrl
           - apple,t8103-pinctrl
           - apple,t6000-pinctrl
       - const: apple,pinctrl
