@@ -28,6 +28,10 @@ description: |
   - Mac Studio (M1 Max, 2022)
   - Mac Studio (M1 Ultra, 2022)
 
+  As well as devices based on Apple's mobile A10 SoC:
+
+  - iPad (7th generation, 2019)
+
   The compatible property should follow this format:
 
   compatible = "apple,<targettype>", "apple,<socid>", "apple,arm-platform";
@@ -92,6 +96,14 @@ properties:
           - enum:
               - apple,j375d # Mac Studio (M1 Ultra, 2022)
           - const: apple,t6002
+          - const: apple,arm-platform
+
+      - description: Apple A10 SoC based platforms
+        items:
+          - enum:
+              - apple,j171 # Apple iPad (7th generation, 2019, WiFi)
+              - apple,j172 # Apple iPad (7th generation, 2019, Cellular)
+          - const: apple,t8010
           - const: apple,arm-platform
 
 additionalProperties: true
