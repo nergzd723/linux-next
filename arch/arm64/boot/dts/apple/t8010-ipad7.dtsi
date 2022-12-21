@@ -1,0 +1,65 @@
+// SPDX-License-Identifier: GPL-2.0+ OR MIT
+/*
+ * Apple iPad 7 common device tree
+ *
+ * Copyright (c) 2022, Konrad Dybcio <konrad.dybcio@somainline.org>
+ */
+
+#include "t8010.dtsi"
+#include <dt-bindings/input/input.h>
+
+/ {
+	gpio-keys {
+		compatible = "gpio-keys";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		home {
+			label = "Home Button";
+			gpios = <&pinctrl 180 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_LEFTMETA>;
+		};
+
+		power {
+			label = "Power Button";
+			gpios = <&pinctrl 179 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_POWER>;
+		};
+
+		volume-up {
+			label = "Volume Up";
+			gpios = <&pinctrl 90 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_VOLUMEUP>;
+		};
+
+		volume-down {
+			label = "Volume Down";
+			gpios = <&pinctrl 89 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_VOLUMEDOWN>;
+		};
+	};
+
+	chosen {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		stdout-path = "serial0";
+
+		framebuffer0: framebuffer@0 {
+			compatible = "apple,simple-framebuffer", "simple-framebuffer";
+			reg = <0 0 0 0>; /* To be filled by loader */
+			/* Format properties will be added by loader */
+			status = "disabled";
+		};
+	};
+};
+
+&system_memory {
+	/* The iPad 7 comes with 3 GiB of RAM. */
+	reg = <0x8 0 0 0xc0000000>;
+};
+
+&serial0 {
+    status = "okay";
+};
