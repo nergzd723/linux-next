@@ -13,6 +13,11 @@
 #include "exynos5422-odroid-core.dtsi"
 
 / {
+	aliases {
+		mmc0 = &mmc_0; /* eMMC */
+		mmc1 = &mmc_2; /* uSD */
+	};
+
 	gpio-keys {
 		compatible = "gpio-keys";
 		pinctrl-names = "default";
